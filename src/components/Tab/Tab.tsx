@@ -17,9 +17,7 @@ export const TabWithPanel = (props: Props) => {
       <TabPanel
         index={index}
         value={value}
-        children={panelContent}
-        other={{}}
-      />
+      >{panelContent}</TabPanel>
     </>
   );
 };
