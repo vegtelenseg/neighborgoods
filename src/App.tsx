@@ -1,26 +1,39 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {Switch, BrowserRouter as Router, Route} from 'react-router-dom';
+import Login from './modules/Login/Login';
+import {MuiThemeProvider} from '@material-ui/core';
+import theme from './theme/index';
+import {Navigation} from './modules/Navigation/Navigation';
+import {Home} from './modules/Home/Home';
+import {Cart} from './modules/Cart/Cart';
+import {Sell} from './modules/Sell/Sell';
+import {Profile} from './modules/Profile/Profile';
 
 const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <MuiThemeProvider theme={theme}>
+      <Router>
+        <Switch>
+          <Route path="/login" exact>
+            <Login />
+          </Route>
+          <Route path={['/buy', '/', '/home']} exact>
+            <Home />
+          </Route>
+          <Route path="/sell">
+            <Sell />
+          </Route>
+          <Route path="/cart" exact>
+            <Cart />
+          </Route>
+          <Route path="/profile">
+            <Profile />
+          </Route>
+        </Switch>
+        <Navigation />
+      </Router>
+    </MuiThemeProvider>
   );
-}
+};
 
 export default App;
