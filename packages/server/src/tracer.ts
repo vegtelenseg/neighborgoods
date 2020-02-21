@@ -18,9 +18,7 @@ const tracerConfig = {
     config.get('env') !== 'production'
       ? {
           // Use http locally due to udp issues
-          collectorEndpoint: `http://${
-            jaegerConfig.agentHost
-          }:14268/api/traces`,
+          collectorEndpoint: `http://${jaegerConfig.agentHost}:14268/api/traces`,
         }
       : {
           agentHost: jaegerConfig.agentHost,
