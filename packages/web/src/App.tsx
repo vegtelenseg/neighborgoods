@@ -2,7 +2,7 @@ import React from 'react';
 import {Switch, BrowserRouter as Router, Route} from 'react-router-dom';
 import Login from './modules/Login/Login';
 import {MuiThemeProvider} from '@material-ui/core';
-import theme from './theme/index';
+import {theme} from './Theme';
 import {Navigation} from './modules/Navigation/Navigation';
 import {Home} from './modules/Home/Home';
 import {Cart} from './modules/Cart/Cart';

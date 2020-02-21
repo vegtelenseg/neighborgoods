@@ -67,6 +67,7 @@
     "opentracing": "^0.14.4",
     "passport": "^0.4.0",
     "passport-http-bearer": "^1.0.1",
+    "pg": "^7.18.1",
     "pg-range": "^1.1.0"
   },
   "devDependencies": {
@@ -92,6 +93,7 @@
     "@types/passport-azure-ad": "^4.0.3",
     "@types/passport-http-bearer": "^1.0.34",
     "@types/passport-strategy": "^0.2.35",
+    "@types/pg": "^7.14.1",
     "@types/pino": "^5.15.1",
     "@types/strange": "^1.7.0",
     "@typescript-eslint/eslint-plugin": "^2.6.1",

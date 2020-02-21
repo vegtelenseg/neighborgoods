@@ -180,8 +180,15 @@ const SignIn = (props: any) => {
 
   return (
     <div className={classes.root}>
-      <Grid className={classes.grid} container>
-        <Grid className={classes.quoteContainer} item lg={5}>
+      <Grid className={classes.grid} container xs={12} sm={12} md={12} lg={12}>
+        <Grid
+          className={classes.quoteContainer}
+          item
+          xs={12}
+          sm={12}
+          md={12}
+          lg={12}
+        >
           <div className={classes.quote}>
             <div className={classes.quoteInner}>
               <Typography className={classes.quoteText} variant="h1">

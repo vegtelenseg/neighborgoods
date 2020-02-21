@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test
+    ports:
+# Perhaps consider PORT binding
+      - 5432
+    volumes:
+      - "./dumps:/dumps"
+      - db-postgres:/var/opt/postgres
+
+volumes:
+  db-postgres:
