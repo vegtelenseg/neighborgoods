@@ -1,13 +1,13 @@
 import React from 'react';
 import {makeStyles, createStyles, Theme} from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
-import {Formik, Form} from 'formik';
+import {Formik, Form, FormikProps} from 'formik';
 import Box from '@material-ui/core/Box/Box';
 import Button from '@material-ui/core/Button/Button';
 import * as Yup from 'yup';
 import TextField from '@material-ui/core/TextField/TextField';
 import {Datepicker} from '../../components/Datepicker';
+import {Dropzone} from '../../components/Dropzone';
+import {OutlinedTextField} from '../../components/TextField';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -44,23 +44,40 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface ProductDetails {
-  image: File;
+  images: string[];
   price: string;
   unitNumber: string;
   availableAt: string;
 }
 
+const FILE_SIZE = 5000000000;
+const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/png'];
+
 const Schema = Yup.object().shape({
-  image: Yup.string().required(
-    'Sorry. You have have to upload at least one image'
-  ),
+  images: Yup.mixed()
+    .test({
+      name: 'fileSize',
+      exclusive: true,
+      message: 'File Size is too large',
+      test: function(value) {
+        console.log('CONTEXT VALUES: ', value[0].size);
+        return value[0].size <= FILE_SIZE;
+      },
+    })
+    .test('fileType', 'Unsupported File Format', (value) =>
+      SUPPORTED_FORMATS.includes(value[0].type)
+    ),
   price: Yup.string().required('Please specify the price of the item'),
   unitNumber: Yup.string().required('Please specify your house number'),
   availableAt: Yup.string().required('Please pick a date to make the sale'),
 });
+
 export const Sell = () => {
   const classes = useStyles();
-  const [productImage, setProductImage] = React.useState(null as any);
+  const [images, setSelectedImages] = React.useState([] as any);
+  const handleImageSelect = (images: string[]) => {
+    setSelectedImages(images);
+  };
   return (
     <Box className={classes.root}>
       <Formik<ProductDetails>
@@ -69,58 +86,34 @@ export const Sell = () => {
         }}
         validationSchema={Schema}
         initialValues={{
-          image: null as any,
+          images,
           price: '',
           unitNumber: '',
           availableAt: '',
         }}
       >
         {(formikProps) => {
+          console.log('ERRORS: ', formikProps.errors);
           return (
             <>
               <Form>
-                <input
-                  name="image"
-                  className={classes.input}
-                  id="icon-button-file"
-                  type="file"
-                  onChange={(e) => {
-                    e.persist();
-                    const hasFiles =
-                      e.target.files && e.target.files.length > 0;
-                    const file = hasFiles && e.target.files![0];
-                    setProductImage(URL.createObjectURL(file));
-                    formikProps.setFieldValue('image', file);
-                  }}
+                <Dropzone
+                  onChange={handleImageSelect}
+                  onDrop={formikProps.setFieldValue}
+                  currentImages={images}
                 />
-                <Box className={classes.imagePreview}>
-                  <img src={productImage} />
-                </Box>
-                <Box className={classes.cameraIcon}>
-                  <label htmlFor="icon-button-file">
-                    <IconButton
-                      color="primary"
-                      aria-label="upload picture"
-                      component="span"
-                    >
-                      <PhotoCamera />
-                    </IconButton>
-                  </label>
-                </Box>
                 <Box>
-                  <TextField
-                    onChange={formikProps.handleChange}
-                    variant="outlined"
+                  <OutlinedTextField
+                    type="number"
                     label="Price"
                     name="price"
                     placeholder="How much is the item going for?"
                   />
                 </Box>
                 <Box>
-                  <TextField
-                    onChange={formikProps.handleChange}
+                  <OutlinedTextField
                     label="Unit Number"
-                    variant="outlined"
+                    type="number"
                     name="unitNumber"
                     placeholder="What is your unit number?"
                   />

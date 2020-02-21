@@ -18,6 +18,11 @@ declare module '@material-ui/core/styles/createMuiTheme' {
 
 export const baseTheme = createMuiTheme({
   spacing: (factor) => `${0.5 * factor}rem`,
+  palette: {
+    primary: {
+      main: '#31789e',
+    },
+  },
   overrides: {
     MuiTextField: {
       root: {
@@ -33,7 +38,7 @@ export const baseTheme = createMuiTheme({
     MuiOutlinedInput: {
       root: {
         '&$focused $notchedOutline': {
-          borderColor: '#fff',
+          borderColor: '#cecece',
         },
       },
       input: {
@@ -42,9 +47,6 @@ export const baseTheme = createMuiTheme({
       },
       notchedOutline: {
         borderColor: '#fff',
-        '&$focused': {
-          borderColor: 'red ',
-        },
       },
     },
     MuiFormLabel: {
@@ -53,6 +55,12 @@ export const baseTheme = createMuiTheme({
         '&$focused': {
           color: '#fff',
         },
+      },
+    },
+    MuiFormHelperText: {
+      contained: {
+        marginLeft: '2px',
+        marginTop: '.5rem',
       },
     },
   },
