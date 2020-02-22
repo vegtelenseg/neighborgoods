@@ -8,11 +8,18 @@ export default new GraphQLObjectType({
   fields: () => ({
     user: {
       type: User,
-      resolve: async (_parent, _args, context: Context, info) => {
-        console.log('CONTEXT: ', info);
+      resolve: async (_parent, _args, context: Context) => {
+        console.log('ctx: ', context.startSpan);
         //if the user object does not have an id, then the user does not exist in our db.
-        const user = await UserService.FetchUserById(context, 2);
-        return user;
+        if (context.user && context.user.id) {
+          const user = await UserService.FetchUserById(
+            context,
+            context.user.id
+          );
+          return user;
+        } else {
+          return null;
+        }
       },
     },
   }),

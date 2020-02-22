@@ -1,5 +1,7 @@
 const express = require('express');
-import {Request} from 'express';
+import jwt from 'jsonwebtoken';
+const bodyParser = require('body-parser');
+import {Request, NextFunction, Response} from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
@@ -13,96 +15,106 @@ import helmet from 'helmet';
 //import graphqlHTTP from 'express-graphql';
 import schema from '../schema';
 import tracer from '../tracer';
-import Context from '../context';
-import {startSpan} from '../util';
+// import Context from '../context';
+import {createContext} from '../util';
+import {User} from '../models';
+import {UserService} from '../services/UserService';
 
 //const autoRegister = true;
 
 const app = express();
+
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 app.use(cors());
 app.use(helmet());
-// class CustomGoogleStrategy extends GoogleStrategy {
-//   // eslint-disable-next-line
-//   public authorizationParams(options: any) {
-//     const params = super.authorizationParams(options);
 
-//     if (options.state) {
-//       // @ts-ignore
-//       params.state = options.state;
-//     }
+const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
 
-//     return params;
-//   }
-// }
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
 
-// passport.use(  new CustomGoogleStrategy(
-//   {
-//     passReqToCallback: true,
-//     clientID: clientId,
-//     clientSecret,
-//     scope: ['email', 'openid'],
-//     // OpenId Connect
-//     userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
-//     callbackURL: `${apiUrl}/auth/google/callback`,
-//   },
-//   async (
-//     req: Request,
-//     _accessToken: string,
-//     _refreshToken: string,
-//     profile: any,
-//     cb: any
-//   ) => {
-//     // TODO check if email has been verified
-//     const [{value: email /* verified */}] = profile.emails;
+    jwt.verify(token, 'secret', (err: any, user: any) => {
+      if (err) {
+        return res.sendStatus(403);
+      }
 
-//     const context = createContext(req);
-
-//     try {
-//       const user = await UserService.findByUsername(context, email);
-
-//       if (user) {
-//         return cb(null, user);
-//       } else if (autoRegister) {
-//         // tslint:disable-next-line no-console
-//         console.log('Auto Registering User...');
-//         // TODO whitelist stackworx.io for admin roles
-//         // TODO
-//         // user = await userService.create(context, {username: email});
-//         return cb(null, user);
-//       }
-
-//       return cb(new Error(`User ${email} not found.`));
-//     } catch (ex) {
-//       return cb(ex);
-//     }
-//   }
-// ));
+      req.user = user;
+      return next();
+    });
+  } else {
+    res.sendStatus(401);
+  }
+};
+app.use('/graphql', authenticateJWT);
 
 // @ts-ignore
-app.post('/login', (req, res) => console.log('Yup'));
+app.post('/login', async (req, res) => {
+  const {username, password} = req.body;
+  const context = createContext(req);
+  const accessTokenSecret = 'secret';
+  const user = (await User.query().context(context)).find(
+    (user) => user.username === username && user.password === password
+  );
+  console.log('USER: ', user);
+  if (user) {
+    const accessToken = jwt.sign(
+      {username: user.username, id: user.id},
+      accessTokenSecret
+    );
 
-export function createContext(req: Request): Context {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let span = (req as any).span;
-
-  if (span == null) {
-    span = tracer.startSpan('UNKNOWN');
+    res.json({
+      accessToken,
+    });
+  } else {
+    res.send('Username or password incorrect');
   }
+});
 
-  return {
-    span,
-    // @ts-ignore
-    user: req.user,
-    req,
-    startSpan,
-  };
-}
+// export function createContext(req: Request): Context {
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   let span = (req as any).span;
+
+//   if (span == null) {
+//     span = tracer.startSpan('UNKNOWN');
+//   }
+
+//   return {
+//     span,
+//     // @ts-ignore
+//     user: req.user,
+//     req,
+//     startSpan,
+//   };
+// }
 
 const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
-  context: ({req}: {req: Request}) => {
-    return createContext(req);
+  context: async ({req, connection}: {req: Request; connection: any}) => {
+    if (connection) {
+      const {token} = connection.context;
+      console.log('DECODED: ', token);
+
+      if (!token) {
+        return {};
+      }
+
+      const decoded: any = jwt.verify(token, 'secret');
+      const user = await UserService.findByUsername(
+        createContext(req),
+        decoded.username
+      );
+      console.log(JSON.stringify(user));
+      return {user};
+    } else {
+      // User already authenticated previously
+      return req;
+    }
   },
   // TODO: disable these in future
   introspection: true,
@@ -122,7 +134,7 @@ const apolloServer = new ApolloServer({
       }),
   ],
 });
-apolloServer.applyMiddleware({app, path: '/graphql'});
+apolloServer.applyMiddleware({app, path: '/graphql', bodyParserConfig: true});
 const port = 5000;
 
 app.listen(port, () =>

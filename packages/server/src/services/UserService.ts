@@ -2,6 +2,8 @@ import {User} from '../models';
 import {transaction, Transaction} from 'objection';
 import Context from '../context';
 import {addActiveStatusFields} from './helpers';
+import {PointInTimeState} from '../models/base';
+import {UserStatus} from '../models/user';
 
 // const USER_EAGER_RELATIONS = '[profile(active), statuses(active)]';
 
@@ -40,6 +42,26 @@ export class UserService {
       .findById(userId);
     if (!user) throw new Error('User was not found');
     return user;
+  }
+
+  public static async findByUsername(
+    context: Context,
+    username: string,
+    trx?: Transaction
+  ): Promise<User | undefined> {
+    try {
+      return User.query(trx)
+        .context(context)
+        .eager(USER_EAGER_RELATIONS)
+        .whereExists(
+          UserStatus.query()
+            .whereColumn('users.id', 'userStatus.userId')
+            .andWhere({state: PointInTimeState.active})
+        )
+        .findOne('username', username);
+    } catch (err) {
+      throw new Error(`User with username ${username} could not be found.`);
+    }
   }
 
   public static async create(

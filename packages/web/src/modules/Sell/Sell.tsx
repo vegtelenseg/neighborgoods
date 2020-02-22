@@ -1,10 +1,9 @@
 import React from 'react';
 import {makeStyles, createStyles, Theme} from '@material-ui/core/styles';
-import {Formik, Form, FormikProps} from 'formik';
+import {Formik, Form} from 'formik';
 import Box from '@material-ui/core/Box/Box';
 import Button from '@material-ui/core/Button/Button';
 import * as Yup from 'yup';
-import TextField from '@material-ui/core/TextField/TextField';
 import {Datepicker} from '../../components/Datepicker';
 import {Dropzone} from '../../components/Dropzone';
 import {OutlinedTextField} from '../../components/TextField';

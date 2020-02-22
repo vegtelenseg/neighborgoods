@@ -1,7 +1,4 @@
 import {createMuiTheme, responsiveFontSizes} from '@material-ui/core/styles';
-import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import React from 'react';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
   interface Theme {

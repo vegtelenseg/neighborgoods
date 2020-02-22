@@ -57,7 +57,7 @@ export class BaseModel<TContext extends Context> extends Model
           // Parent span can be null during migrations or seeds
           span: parentSpan,
           user,
-          startSpan,
+          // startSpan,
         } = query.context();
 
         if (parentSpan == null && !suppressLogs) {
@@ -72,14 +72,14 @@ export class BaseModel<TContext extends Context> extends Model
           console.warn(`Missing User in models/base. Query: ${queryData.sql}.`);
         }
 
-        span = startSpan('knex query', {
-          childOf: parentSpan,
-          tags: {
-            method: queryData.method,
-            sql: queryData.sql,
-            user: user ? user.id : null,
-          },
-        });
+        // span = startSpan('knex query', {
+        //   childOf: parentSpan,
+        //   tags: {
+        //     method: queryData.method,
+        //     sql: queryData.sql,
+        //     user: user ? user.id : null,
+        //   },
+        // });
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       knexQueryBuilder.on('query-error', (error: Error) => {
