@@ -32,7 +32,7 @@ export class ProductDetail extends PointInTimeModel<Context> {
 
 export class ProductAvailability extends PointInTimeModel<Context> {
   public productId!: number;
-  public availability!: ProductAvailabilityType;
+  public sold!: ProductAvailabilityType;
   public message!: string;
   public product!: Partial<Product>;
 

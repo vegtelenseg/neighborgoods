@@ -76,16 +76,14 @@ export async function up(knex: Knex) {
         .increments()
         .unsigned()
         .primary();
+      table.enu('sold', ['SOLD', 'AVAILABLE']);
       table
-        .boolean('sold')
+        .integer('product_id')
         .notNullable()
-        .defaultTo(false);
-      table
-        .integer('user_product_id')
-        .notNullable()
-        .references('user_product.id')
+        .references('product.id')
         .onDelete('CASCADE');
       auditing(knex, table);
+      masterData(knex, table);
     }
   );
   await knex.schema.createTable('product_category', (table: TableBuilder) => {
@@ -180,10 +178,13 @@ export async function down(knex: Knex) {
   await knex.schema
     .dropTable('user_status')
     .dropTable('user_profile')
-    .dropTable('user_product')
-    .dropTable('product_category')
     .dropTable('product_availability')
     .dropTable('product_schedule')
+    .dropTable('user_product')
+    .dropTable('product_status')
+    .dropTable('product_detail')
+
+    .dropTable('product_category')
     .dropTable('product')
     .dropTable('users');
 }
