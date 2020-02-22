@@ -49,10 +49,6 @@ export async function up(knex: Knex) {
       .increments()
       .unsigned()
       .primary();
-    table
-      .string('name', 50)
-      .notNullable()
-      .index();
     auditing(knex, table);
   });
   await knex.schema.createTable('user_product', (table: TableBuilder) => {
@@ -71,9 +67,10 @@ export async function up(knex: Knex) {
       .references('product.id')
       .onDelete('CASCADE');
     auditing(knex, table);
+    masterData(knex, table);
   });
   await knex.schema.createTable(
-    'user_product_availability',
+    'product_availability',
     (table: TableBuilder) => {
       table
         .increments()
@@ -91,6 +88,51 @@ export async function up(knex: Knex) {
       auditing(knex, table);
     }
   );
+  await knex.schema.createTable('product_category', (table: TableBuilder) => {
+    table.increments().primary();
+    table
+      .string('name')
+      .index()
+      .notNullable();
+    auditing(knex, table);
+  });
+  await knex.schema.createTable('product_detail', (table: TableBuilder) => {
+    table.increments().primary();
+    table
+      .integer('product_id')
+      .unsigned()
+      .index()
+      .references('product.id')
+      .onDelete('CASCADE')
+      .notNullable();
+    table.string('price').notNullable();
+    table
+      .integer('category_id')
+      .unsigned()
+      .index()
+      .references('product_category.id')
+      .onDelete('CASCADE')
+      .notNullable();
+    table
+      .string('name', 100)
+      .notNullable()
+      .index();
+    auditing(knex, table);
+    masterData(knex, table);
+  });
+  await knex.schema.createTable('product_status', (table: TableBuilder) => {
+    table.increments().primary();
+    table
+      .integer('product_id')
+      .unsigned()
+      .index()
+      .references('product.id')
+      .onDelete('CASCADE')
+      .notNullable();
+
+    auditing(knex, table);
+    masterData(knex, table);
+  });
   await knex.schema.createTable('product_schedule', (table: TableBuilder) => {
     table
       .increments()
@@ -102,7 +144,7 @@ export async function up(knex: Knex) {
       .notNullable()
       .references('product.id')
       .onDelete('CASCADE');
-    table.time('scheduled_at');
+    table.time('scheduled_at').notNullable();
   });
   await knex.schema.alterTable('users', (table) => {
     table
@@ -138,8 +180,9 @@ export async function down(knex: Knex) {
   await knex.schema
     .dropTable('user_status')
     .dropTable('user_profile')
-    .dropTable('user_product_availability')
     .dropTable('user_product')
+    .dropTable('product_category')
+    .dropTable('product_availability')
     .dropTable('product_schedule')
     .dropTable('product')
     .dropTable('users');

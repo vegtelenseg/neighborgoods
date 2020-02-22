@@ -1,11 +1,40 @@
 import {AggregateRoot, PointInTimeModel} from './base';
 import Context from '../context';
 import {Model} from 'objection';
+import {ProductAvailabilityType} from '../types';
+import {Product} from './product';
 
 export class UserStatus extends PointInTimeModel<Context> {
   userId!: number;
 }
 
+export class UserProduct extends PointInTimeModel<Context> {
+  public readonly id!: number;
+  public userId!: number;
+  public productId!: number;
+  public product!: ProductAvailabilityType;
+
+  public static get relationMappings() {
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: 'userProduct.userId',
+          to: 'users.id',
+        },
+      },
+      product: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Product,
+        join: {
+          from: 'userProduct.productId',
+          to: 'product.id',
+        },
+      },
+    };
+  }
+}
 export class UserProfile extends PointInTimeModel<Context> {
   public readonly id!: number;
   public userId!: number;
@@ -19,6 +48,7 @@ export class User extends AggregateRoot<Context> {
   public username!: string;
   public password!: string;
   public statuses!: Partial<UserStatus>[];
+  public userProducts!: Partial<UserProduct>[];
   public profile!: Partial<UserProfile>[];
 
   public static get tableName() {
@@ -54,6 +84,14 @@ export class User extends AggregateRoot<Context> {
         join: {
           from: 'users.id',
           to: 'userProfile.userId',
+        },
+      },
+      userProducts: {
+        relation: Model.HasManyRelation,
+        modelClass: UserProduct,
+        join: {
+          from: 'users.id',
+          to: 'userProduct.userId',
         },
       },
       statuses: {

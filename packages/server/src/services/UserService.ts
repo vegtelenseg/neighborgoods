@@ -20,6 +20,7 @@ interface UserProfile {
 export interface CreateUserOptions {
   credentials: UserCredentials;
   profile: UserProfile;
+  products: {productId: number}[];
   startDate?: Date;
 }
 
@@ -51,6 +52,12 @@ export class UserService {
               ...addActiveStatusFields(startDate),
             },
           ],
+          userProducts: userInfo.products.map((product) => {
+            return {
+              productId: product.productId,
+              ...addActiveStatusFields(startDate),
+            };
+          }),
           statuses: [addActiveStatusFields(startDate)],
         });
       return user;
