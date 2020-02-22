@@ -13,6 +13,8 @@ import helmet from 'helmet';
 //import graphqlHTTP from 'express-graphql';
 import schema from '../schema';
 import tracer from '../tracer';
+import Context from '../context';
+import {startSpan} from '../util';
 
 //const autoRegister = true;
 
@@ -79,11 +81,28 @@ app.use(helmet());
 // @ts-ignore
 app.post('/login', (req, res) => console.log('Yup'));
 
+export function createContext(req: Request): Context {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let span = (req as any).span;
+
+  if (span == null) {
+    span = tracer.startSpan('UNKNOWN');
+  }
+
+  return {
+    span,
+    // @ts-ignore
+    user: req.user,
+    req,
+    startSpan,
+  };
+}
+
 const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
   context: ({req}: {req: Request}) => {
-    return req;
+    return createContext(req);
   },
   // TODO: disable these in future
   introspection: true,

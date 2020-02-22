@@ -24,7 +24,24 @@ export interface CreateUserOptions {
   startDate?: Date;
 }
 
+const USER_EAGER_RELATIONS =
+  '[profile(active), statuses(active), userProducts(active).[product.[availability(active)]]]';
+
 export class UserService {
+  public static async FetchUserById(
+    context: Context,
+    userId: number,
+    eagerRelations: string = USER_EAGER_RELATIONS,
+    trx?: Transaction
+  ): Promise<User> {
+    const user = await User.query(trx)
+      .eager(eagerRelations)
+      .context(context)
+      .findById(userId);
+    if (!user) throw new Error('User was not found');
+    return user;
+  }
+
   public static async create(
     context: Context,
     userInfo: CreateUserOptions,
