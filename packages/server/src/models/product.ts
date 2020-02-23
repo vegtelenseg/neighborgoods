@@ -1,6 +1,6 @@
+import {Model} from 'objection';
 import {PointInTimeModel, AggregateRoot} from './base';
 import Context from '../context';
-import {Model} from 'objection';
 import {ProductCategory} from './productCategory';
 import {ProductAvailabilityType} from '../types';
 

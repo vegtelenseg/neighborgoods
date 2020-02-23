@@ -1,5 +1,5 @@
-import {User} from '../models';
 import {transaction, Transaction} from 'objection';
+import {User} from '../models';
 import Context from '../context';
 import {addActiveStatusFields} from './helpers';
 import {PointInTimeState} from '../models/base';
@@ -27,7 +27,7 @@ export interface CreateUserOptions {
 }
 
 const USER_EAGER_RELATIONS =
-  '[profile(active), statuses(active), userProducts(active).[product.[availability(active)]]]';
+  '[profile(active), statuses(active), userProducts(active).[product.[availability(active), detail(active)]]]';
 
 export class UserService {
   public static async FetchUserById(

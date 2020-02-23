@@ -1,6 +1,4 @@
-const express = require('express');
 import jwt from 'jsonwebtoken';
-const bodyParser = require('body-parser');
 import {Request, NextFunction, Response} from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
@@ -19,6 +17,8 @@ import tracer from '../tracer';
 import {createContext} from '../util';
 import {User} from '../models';
 import {UserService} from '../services/UserService';
+const bodyParser = require('body-parser');
+const express = require('express');
 
 //const autoRegister = true;
 
@@ -32,6 +32,7 @@ app.use(
 app.use(cors());
 app.use(helmet());
 
+// @ts-ignore
 const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
@@ -47,26 +48,24 @@ const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
       return next();
     });
   } else {
+    console.log('No auth: ', authHeader);
     res.sendStatus(401);
   }
 };
 app.use('/graphql', authenticateJWT);
 
-// @ts-ignore
-app.post('/login', async (req, res) => {
+app.post('/login', async (req: Request, res: Response) => {
   const {username, password} = req.body;
   const context = createContext(req);
   const accessTokenSecret = 'secret';
   const user = (await User.query().context(context)).find(
     (user) => user.username === username && user.password === password
   );
-  console.log('USER: ', user);
   if (user) {
     const accessToken = jwt.sign(
       {username: user.username, id: user.id},
       accessTokenSecret
     );
-
     res.json({
       accessToken,
     });
@@ -75,30 +74,12 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// export function createContext(req: Request): Context {
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   let span = (req as any).span;
-
-//   if (span == null) {
-//     span = tracer.startSpan('UNKNOWN');
-//   }
-
-//   return {
-//     span,
-//     // @ts-ignore
-//     user: req.user,
-//     req,
-//     startSpan,
-//   };
-// }
-
 const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
   context: async ({req, connection}: {req: Request; connection: any}) => {
     if (connection) {
       const {token} = connection.context;
-      console.log('DECODED: ', token);
 
       if (!token) {
         return {};
@@ -112,7 +93,6 @@ const apolloServer = new ApolloServer({
       console.log(JSON.stringify(user));
       return {user};
     } else {
-      // User already authenticated previously
       return req;
     }
   },

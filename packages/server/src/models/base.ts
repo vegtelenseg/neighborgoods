@@ -46,7 +46,7 @@ export class BaseModel<TContext extends Context> extends Model
   ): QueryBuilder<CB> {
     const query = super.query(trxOrKnex);
 
-    let span: Span | null = null;
+    const span: Span | null = null;
 
     // https://github.com/Vincit/objection.js/issues/807#issuecomment-366734514
     // Tracing Events

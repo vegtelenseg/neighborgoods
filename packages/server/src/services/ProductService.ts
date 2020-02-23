@@ -1,6 +1,6 @@
+import {transaction, Transaction} from 'objection';
 import Context from '../context';
 import {Product, ProductAvailability} from '../models/product';
-import {transaction, Transaction} from 'objection';
 import {addActiveStatusFields} from './helpers';
 import {ProductAvailabilityType} from '../types';
 
