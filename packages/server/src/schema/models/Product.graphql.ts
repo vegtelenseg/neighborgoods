@@ -22,10 +22,11 @@ export const Product = new GraphQLObjectType({
   name: 'Product',
   interfaces: [PointInTimeInterface],
   fields: () => ({
-    id: globalIdField('System'),
+    id: globalIdField('Product'),
     detail: {
       type: GraphQLNonNull(ProductDetail),
       resolve: (parent) => {
+        console.log('DETAIL PARENT: ', parent);
         return parent.activeDetail;
       },
     },
@@ -77,7 +78,7 @@ export const ProductCategory = new GraphQLObjectType({
   fields: () => ({
     id: globalIdField('ProductCategory'),
     name: {type: GraphQLNonNull(GraphQLString)},
-    systems: {
+    products: {
       type: GraphQLNonNull(GraphQLList(GraphQLNonNull(Product))),
     },
   }),

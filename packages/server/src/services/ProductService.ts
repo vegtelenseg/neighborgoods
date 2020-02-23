@@ -1,8 +1,11 @@
 import {transaction, Transaction} from 'objection';
 import Context from '../context';
-import {Product, ProductAvailability} from '../models/product';
+import {Product, ProductAvailability, ProductStatus} from '../models/product';
 import {addActiveStatusFields} from './helpers';
 import {ProductAvailabilityType} from '../types';
+import {ProductCategory} from '../models/productCategory';
+import {PointInTimeState} from '../models/base';
+import {UserProduct} from '../models/user';
 
 export interface CreateProductOptions {
   categoryId: number;
@@ -17,7 +20,47 @@ interface UpdateAvailabilityOptions {
   startDate?: Date;
 }
 
+const PRODUCTS_EAGER = '[availability, detail(active)]';
+
 export class ProductService {
+  public static async fetchProductsByCategory(
+    context: Context,
+    //linkedToUser provides information whether the user wants systems that are, or aren't linked to them
+    //if not provided, will return all systems
+    linkedToUser?: boolean
+  ) {
+    const categorySystems = ProductCategory.query()
+      .context(context)
+      .joinEager(
+        '[products.[detail(active).[category], statuses(active), availability(active)]]'
+      )
+      //make sure we only return active systems
+      .whereExists(
+        ProductStatus.query()
+          .whereColumn('products.id', 'productStatus.productId')
+          .andWhere({state: PointInTimeState.active})
+      );
+
+    if (linkedToUser !== undefined) {
+      if (!context.user) {
+        throw new Error(
+          'User context is undefined. Cannot return systems for user'
+        );
+      }
+
+      const filterQuery = UserProduct.query()
+        .whereColumn('product.id', 'userSystem.productId')
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .andWhere({userId: context.user!.id, state: PointInTimeState.active});
+
+      if (linkedToUser) {
+        categorySystems.whereExists(filterQuery);
+      } else {
+        categorySystems.whereNotExists(filterQuery);
+      }
+    }
+    return await categorySystems;
+  }
   public static async create(
     context: Context,
     {categoryId, name, price, startDate = new Date()}: CreateProductOptions
@@ -50,7 +93,7 @@ export class ProductService {
         const product = await Product.query(trx)
           //  .eager('[availability, detail(active)]')
           .context(context)
-          .eager('[availability, detail(active)]')
+          .eager(PRODUCTS_EAGER)
           .context(context)
           .findById(productId);
         if (!product) {

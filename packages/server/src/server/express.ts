@@ -52,7 +52,8 @@ const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
     res.sendStatus(401);
   }
 };
-app.post('/graphql', authenticateJWT);
+// TODO: Uncomment this
+// app.use('/graphql', authenticateJWT);
 
 app.post('/login', async (req: Request, res: Response) => {
   const {username, password} = req.body;

@@ -1,0 +1,6 @@
+projects:
+  neighborgoods:
+    schemaPath: ./src/schemas/schema.graphql
+    extensions:
+      endpoints:
+        dev: 'http://localhost:5000/graphql'

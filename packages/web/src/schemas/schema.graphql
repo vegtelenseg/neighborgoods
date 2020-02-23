@@ -1,0 +1,105 @@
+# source: http://localhost:5000/graphql
+# timestamp: Sun Feb 23 2020 21:40:26 GMT+0200 (South Africa Standard Time)
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
+`date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO
+8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+interface PointInTimeInterface {
+  createdAt: DateTime!
+  updatedAt: DateTime
+  state: PointInTimeStateEnum!
+}
+
+enum PointInTimeStateEnum {
+  ACTIVE
+  INACTIVE
+}
+
+type Product implements PointInTimeInterface {
+  """The ID of an object"""
+  id: ID!
+  detail: ProductDetail!
+  currentAvailability: ProductAvailability!
+  availability: [ProductAvailability]
+  createdAt: DateTime!
+  updatedAt: DateTime
+  state: PointInTimeStateEnum!
+}
+
+type ProductAvailability implements PointInTimeInterface {
+  """The ID of an object"""
+  id: ID!
+  availability: ProductAvailabilityEnum!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  state: PointInTimeStateEnum!
+}
+
+enum ProductAvailabilityEnum {
+  SOLD
+  AVAILABLE
+}
+
+type ProductCategory {
+  """The ID of an object"""
+  id: ID!
+  name: String!
+  products: [Product!]!
+}
+
+type ProductDetail implements PointInTimeInterface {
+  """The ID of an object"""
+  id: ID!
+  category: String!
+  price: Int!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime
+  state: PointInTimeStateEnum!
+}
+
+type Query {
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+  viewer: Viewer!
+}
+
+type User {
+  """The ID of an object"""
+  id: ID!
+  username: String!
+  profile: UserProfile
+  userProducts: [UserProduct]
+}
+
+type UserProduct {
+  """The ID of an object"""
+  id: ID!
+  product: Product!
+}
+
+type UserProfile {
+  profileName: String!
+  email: String!
+  unitNumber: Int
+  cellphone: String
+}
+
+type Viewer {
+  user: User
+  products: [Product!]!
+  productsByCategory(linkedToUser: Boolean): [ProductCategory!]!
+}
