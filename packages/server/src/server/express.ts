@@ -41,7 +41,7 @@ const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
 
     jwt.verify(token, 'secret', (err: any, user: any) => {
       if (err) {
-        return res.sendStatus(403);
+        return res.json({message: 'Sorry. You are not logged in.'});
       }
 
       req.user = user;
@@ -52,7 +52,7 @@ const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
     res.sendStatus(401);
   }
 };
-app.use('/graphql', authenticateJWT);
+app.post('/graphql', authenticateJWT);
 
 app.post('/login', async (req: Request, res: Response) => {
   const {username, password} = req.body;
@@ -78,6 +78,7 @@ const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
   context: async ({req, connection}: {req: Request; connection: any}) => {
+    const ctx = createContext(req);
     if (connection) {
       const {token} = connection.context;
 
@@ -86,14 +87,11 @@ const apolloServer = new ApolloServer({
       }
 
       const decoded: any = jwt.verify(token, 'secret');
-      const user = await UserService.findByUsername(
-        createContext(req),
-        decoded.username
-      );
+      const user = await UserService.findByUsername(ctx, decoded.username);
       console.log(JSON.stringify(user));
       return {user};
     } else {
-      return req;
+      return ctx;
     }
   },
   // TODO: disable these in future

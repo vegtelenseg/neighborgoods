@@ -7,9 +7,9 @@ import {
   QueryContext,
 } from 'objection';
 import Knex from 'knex';
+import {BaseContext} from '../context';
 import {Span} from 'opentracing';
 import {knex} from '../db';
-import Context from '../context';
 
 Model.knex(knex);
 
@@ -28,7 +28,7 @@ export enum PointInTimeState {
 
 const suppressLogs =
   process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production';
-export class BaseModel<TContext extends Context> extends Model
+export class BaseModel<TContext extends BaseContext> extends Model
   implements AuditMixin {
   public readonly id!: number;
   public createdAt!: Date;
@@ -46,7 +46,7 @@ export class BaseModel<TContext extends Context> extends Model
   ): QueryBuilder<CB> {
     const query = super.query(trxOrKnex);
 
-    const span: Span | null = null;
+    let span: Span | null = null;
 
     // https://github.com/Vincit/objection.js/issues/807#issuecomment-366734514
     // Tracing Events
@@ -57,7 +57,7 @@ export class BaseModel<TContext extends Context> extends Model
           // Parent span can be null during migrations or seeds
           span: parentSpan,
           user,
-          // startSpan,
+          startSpan,
         } = query.context();
 
         if (parentSpan == null && !suppressLogs) {
@@ -72,14 +72,14 @@ export class BaseModel<TContext extends Context> extends Model
           console.warn(`Missing User in models/base. Query: ${queryData.sql}.`);
         }
 
-        // span = startSpan('knex query', {
-        //   childOf: parentSpan,
-        //   tags: {
-        //     method: queryData.method,
-        //     sql: queryData.sql,
-        //     user: user ? user.id : null,
-        //   },
-        // });
+        span = startSpan('knex query', {
+          childOf: parentSpan,
+          tags: {
+            method: queryData.method,
+            sql: queryData.sql,
+            user: user ? user.id : null,
+          },
+        });
       });
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       knexQueryBuilder.on('query-error', (error: Error) => {
@@ -172,7 +172,7 @@ export class BaseModel<TContext extends Context> extends Model
   }
 
   //allows returning undefined compared to method above.
-  //there are cases where presence of an active record is perfectly valid
+  //there are cases where presence of na active record is perfectly valid
   protected getActiveRecordIfPresent<T extends PointInTimeModel<TContext>>(
     records: Array<Partial<T>> | undefined
   ): T | undefined {
@@ -190,7 +190,7 @@ export class BaseModel<TContext extends Context> extends Model
 }
 
 export abstract class PointInTimeModel<
-  TContext extends Context
+  TContext extends BaseContext
 > extends BaseModel<TContext> {
   public durationStart!: Date;
   public durationEnd?: Date;
@@ -240,7 +240,7 @@ export abstract class PointInTimeModel<
 }
 
 export class AggregateRoot<
-  TContext extends Context,
+  TContext extends BaseContext,
   T extends PointInTimeModel<TContext> = PointInTimeModel<TContext>
 > extends BaseModel<TContext> {
   public statuses!: Array<Partial<T>>;
