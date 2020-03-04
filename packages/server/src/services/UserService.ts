@@ -4,10 +4,11 @@ import Context from '../context';
 import {addActiveStatusFields} from './helpers';
 import {PointInTimeState} from '../models/base';
 import {UserStatus} from '../models/user';
+import jwt from 'jsonwebtoken';
 
 // const USER_EAGER_RELATIONS = '[profile(active), statuses(active)]';
 
-interface UserCredentials {
+export interface UserCredentials {
   username: string;
   password: string;
 }
@@ -64,6 +65,41 @@ export class UserService {
     }
   }
 
+  public static async GenerateToken(
+    context: Context,
+    username: string,
+    password: string,
+    trx?: Transaction
+  ): Promise<string> {
+    try {
+      // TODO: Some encryption magic here
+      const accessTokenSecret = 'secret';
+      const user = await User.query(trx)
+        .context(context)
+        .eager(USER_EAGER_RELATIONS)
+        .whereExists(
+          UserStatus.query()
+            .whereColumn('users.id', 'userStatus.userId')
+            .andWhere({state: PointInTimeState.active})
+        )
+        .where({
+          username,
+          password,
+        })
+        .findOne('password', password);
+      if (user) {
+        const accessToken = jwt.sign(
+          {username: user.username, id: user.id},
+          accessTokenSecret
+        );
+        return accessToken;
+      } else {
+        return '';
+      }
+    } catch (err) {
+      throw new Error(`User with username ${username} could not be found.`);
+    }
+  }
   public static async create(
     context: Context,
     userInfo: CreateUserOptions,

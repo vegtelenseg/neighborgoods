@@ -228,7 +228,7 @@ export default function Menu() {
           </div>
         </Toolbar>
       </AppBar>
-        <Toolbar/>
+      <Toolbar />
       {renderMobileMenu}
       {renderMenu}
     </div>

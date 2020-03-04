@@ -10,7 +10,9 @@ import {Sell} from './modules/Sell/Sell';
 import {Profile} from './modules/Profile/Profile';
 import {RelayEnvironmentProvider} from 'relay-hooks';
 import createRelayEnv from './CreateRelayEnv';
-import {useAuthContextProvider} from './contexts/AuthContext';
+import AuthContextProvider, {
+  useAuthContextProvider,
+} from './contexts/AuthContext';
 import {Environment} from 'react-relay';
 import _ from 'lodash';
 import Menu from './modules/Menu/Menu';
@@ -26,10 +28,11 @@ const App = () => {
         handleLogout();
       },
       () => {
+        console.log('CREATE ENV: ', auth);
         if (auth.authenticated) {
-          return Promise.resolve(auth.token);
+          return auth.token;
         } else {
-          return Promise.resolve('');
+          return '';
         }
       }
     );
@@ -45,35 +48,39 @@ const App = () => {
     authRef.current = auth;
   }, [auth, createEnvironment, environment]);
   return (
-    <MuiThemeProvider theme={theme}>
-      <RelayEnvironmentProvider environment={environment}>
-        <Router>
-          <Menu />
-          <Switch>
-            <Route path="/login" exact>
-              <Login />
-            </Route>
-            <Route path={['/buy', '/', '/home']} exact>
-              <Home />
-            </Route>
-            <Route path="/sell">
-              <Sell />
-            </Route>
-            <Route path="/cart" exact>
-              <Cart />
-            </Route>
-            <Route path="/profile">
-              <Profile />
-            </Route>
-            <Route path="/products">
-              <Products />
-            </Route>
-          </Switch>
-          <Navigation />
-        </Router>
-      </RelayEnvironmentProvider>
-    </MuiThemeProvider>
+    <RelayEnvironmentProvider environment={environment}>
+      <Router>
+        <Menu />
+        <Switch>
+          <Route path="/login" exact>
+            <Login />
+          </Route>
+          <Route path={['/buy', '/', '/home']} exact>
+            <Home />
+          </Route>
+          <Route path="/sell">
+            <Sell />
+          </Route>
+          <Route path="/cart" exact>
+            <Cart />
+          </Route>
+          <Route path="/profile">
+            <Profile />
+          </Route>
+          <Route path="/products">
+            <Products />
+          </Route>
+        </Switch>
+        <Navigation />
+      </Router>
+    </RelayEnvironmentProvider>
   );
 };
 
-export default App;
+export const AuthApp = () => (
+  <MuiThemeProvider theme={theme}>
+    <AuthContextProvider>
+      <App />
+    </AuthContextProvider>
+  </MuiThemeProvider>
+);

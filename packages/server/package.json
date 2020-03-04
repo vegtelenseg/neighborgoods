@@ -45,6 +45,7 @@
     "start:worker:debug": "ndb ./node_modules/.bin/ts-node --files  ./src/commands/bull.ts"
   },
   "dependencies": {
+    "@types/jwt-decode": "^2.2.1",
     "apollo-opentracing": "^1.4.2",
     "apollo-server-express": "^2.9.7",
     "btoa": "^1.2.1",
@@ -60,6 +61,7 @@
     "helmet": "^3.21.2",
     "jaeger-client": "^3.17.2",
     "jsonwebtoken": "^8.5.1",
+    "jwt-decode": "^2.2.0",
     "knex": "^0.20.1",
     "objection": "^1.6.11",
     "objection-graphql-relay": "^0.0.9",

@@ -45,12 +45,18 @@ export function RelayRenderer<R extends OperationType = OperationType>({
         return loading;
       }
     }
-    return <CircularProgress color="primary" size={45} style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    }} />;
+    return (
+      <CircularProgress
+        color="primary"
+        size={45}
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+    );
   }
 
   return children(props);

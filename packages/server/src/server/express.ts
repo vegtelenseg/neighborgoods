@@ -4,23 +4,13 @@ import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
 import helmet from 'helmet';
-// import passport from 'passport';
-// import GoogleStrategy from 'passport-google-oauth20';
-
-// import config from '../config';
-// const {clientId, clientSecret} = config.get('oauth.google');
-// const {api: apiUrl} = config.get('url');
-//import graphqlHTTP from 'express-graphql';
 import schema from '../schema';
 import tracer from '../tracer';
-// import Context from '../context';
 import {createContext} from '../util';
-import {User} from '../models';
 import {UserService} from '../services/UserService';
+import {User} from '../models';
 const bodyParser = require('body-parser');
 const express = require('express');
-
-//const autoRegister = true;
 
 const app = express();
 
@@ -32,10 +22,12 @@ app.use(
 app.use(cors());
 app.use(helmet());
 
-// @ts-ignore
-const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
+const authenticateJWT = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
-
   if (authHeader) {
     const token = authHeader.split(' ')[1];
 
@@ -43,20 +35,24 @@ const authenticateJWT = (req: any, res: Response, next: NextFunction) => {
       if (err) {
         return res.json({message: 'Sorry. You are not logged in.'});
       }
-
+      // @ts-ignore
       req.user = user;
       return next();
     });
-  } else {
-    console.log('No auth: ', authHeader);
-    res.sendStatus(401);
   }
 };
-// TODO: Uncomment this
-// app.use('/graphql', authenticateJWT);
 
+app.post('/graphql', authenticateJWT);
 app.post('/login', async (req: Request, res: Response) => {
-  const {username, password} = req.body;
+  const authHeader = req.headers.authorization!;
+  const encodedredentials = authHeader.split(' ')[1];
+  const decodedCredentials = Buffer.from(
+    encodedredentials,
+    'base64'
+  ).toString();
+  const [username, password] = decodedCredentials.split(':');
+  // @ts-ignore
+  console.log('REQ.USER: ', req.user);
   const context = createContext(req);
   const accessTokenSecret = 'secret';
   const user = (await User.query().context(context)).find(
@@ -89,7 +85,6 @@ const apolloServer = new ApolloServer({
 
       const decoded: any = jwt.verify(token, 'secret');
       const user = await UserService.findByUsername(ctx, decoded.username);
-      console.log(JSON.stringify(user));
       return {user};
     } else {
       return ctx;

@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Link as RouterLink, withRouter, useHistory} from 'react-router-dom';
+import {Form, Formik} from 'formik';
 import PropTypes from 'prop-types';
 import {makeStyles} from '@material-ui/core';
 import {
@@ -11,25 +12,10 @@ import {
   Typography,
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import validate from 'validate.js';
 import {FacebookIcon} from '../../assets/icons/facebook';
 import {GoogleIcon} from '../../assets/icons/google';
-
-const schema = {
-  email: {
-    presence: {allowEmpty: false, message: 'is required'},
-    email: true,
-    length: {
-      maximum: 64,
-    },
-  },
-  password: {
-    presence: {allowEmpty: false, message: 'is required'},
-    length: {
-      maximum: 128,
-    },
-  },
-};
+import * as Yup from 'yup';
+import {AuthContext} from '../../contexts/AuthContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -125,59 +111,25 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+const Schema = Yup.object().shape({
+  email: Yup.string().required('Sorry, this field is required'),
+  password: Yup.string().required('Sorry, this field is required'),
+});
+
 const SignIn = (props: any) => {
   const history = useHistory();
+  const {handleLogin} = React.useContext(AuthContext);
 
   const classes = useStyles();
-
-  const [formState, setFormState] = useState({
-    isValid: false,
-    values: {} as any,
-    touched: {} as any,
-    errors: {} as any,
-  });
-
-  useEffect(() => {
-    const errors = validate(formState.values, schema);
-
-    setFormState((formState) => ({
-      ...formState,
-      isValid: errors ? false : true,
-      errors: errors || {},
-    }));
-  }, [formState.values]);
 
   const handleBack = () => {
     history.goBack();
   };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.persist();
-
-    setFormState((formState) => ({
-      ...formState,
-      values: {
-        ...formState.values,
-        [event.target.name]:
-          event.target.type === 'checkbox'
-            ? event.target.checked
-            : event.target.value,
-      },
-      touched: {
-        ...formState.touched,
-        [event.target.name]: true,
-      },
-    }));
-  };
-
-  const handleSignIn = (event: React.ChangeEvent<EventTarget>) => {
-    console.log("STATE: ", formState.values)
-    event.preventDefault();
-    history.push('/');
-  };
-
-  const hasError = (field: string) =>
-    formState.touched[field] && formState.errors[field] ? true : false;
 
   return (
     <div className={classes.root}>
@@ -215,90 +167,119 @@ const SignIn = (props: any) => {
               </IconButton>
             </div>
             <div className={classes.contentBody}>
-              <form className={classes.form} onSubmit={handleSignIn}>
-                <Typography className={classes.title} variant="h2">
-                  Sign in
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  Sign in with social media
-                </Typography>
-                <Grid className={classes.socialButtons} container spacing={2}>
-                  <Grid item>
+              <Formik<LoginCredentials>
+                initialValues={{
+                  email: 'siya@email.com',
+                  password: 'password',
+                }}
+                validationSchema={Schema}
+                onSubmit={async (values, formikHelpers) => {
+                  const response = await handleLogin(
+                    values.email,
+                    values.password
+                  );
+                  if (response) {
+                    console.log('RESPONSE: ', response);
+                    history.push('/');
+                  }
+                }}
+              >
+                {(formikProps) => (
+                  <Form className={classes.form}>
+                    <Typography className={classes.title} variant="h2">
+                      Sign in
+                    </Typography>
+                    <Typography color="textSecondary" gutterBottom>
+                      Sign in with social media
+                    </Typography>
+                    <Grid
+                      className={classes.socialButtons}
+                      container
+                      spacing={2}
+                    >
+                      <Grid item>
+                        <Button
+                          color="primary"
+                          // onClick={handleSignIn}
+                          size="large"
+                          variant="contained"
+                        >
+                          <FacebookIcon className={classes.socialIcon} />
+                          Login with Facebook
+                        </Button>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          // onClick={handleSignIn}
+                          size="large"
+                          variant="contained"
+                        >
+                          <GoogleIcon className={classes.socialIcon} />
+                          Login with Google
+                        </Button>
+                      </Grid>
+                    </Grid>
+                    <Typography
+                      align="center"
+                      className={classes.sugestion}
+                      color="textSecondary"
+                      variant="body1"
+                    >
+                      or login with email address
+                    </Typography>
+                    <TextField
+                      className={classes.textField}
+                      error={!!formikProps.errors.email}
+                      fullWidth
+                      helperText={
+                        formikProps.touched.email && formikProps.errors.email
+                          ? formikProps.errors.email
+                          : null
+                      }
+                      label="Email address"
+                      name="email"
+                      // onChange={formikProps.handleChange}
+                      type="text"
+                      // value={formState.values.email || ''}
+                      variant="outlined"
+                    />
+                    <TextField
+                      className={classes.textField}
+                      error={!!formikProps.errors.email}
+                      fullWidth
+                      helperText={
+                        formikProps.touched.password &&
+                        formikProps.errors.password
+                          ? formikProps.errors.password
+                          : null
+                      }
+                      label="Password"
+                      name="password"
+                      // onChange={formikProps.handleChange}
+                      type="password"
+                      // value={formState.values.password || ''}
+                      variant="outlined"
+                    />
                     <Button
+                      className={classes.signInButton}
                       color="primary"
-                      onClick={handleSignIn}
+                      disabled={!formikProps.isValid}
+                      fullWidth
                       size="large"
+                      type="submit"
                       variant="contained"
                     >
-                      <FacebookIcon className={classes.socialIcon} />
-                      Login with Facebook
+                      Sign in now
                     </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      onClick={handleSignIn}
-                      size="large"
-                      variant="contained"
-                    >
-                      <GoogleIcon className={classes.socialIcon} />
-                      Login with Google
-                    </Button>
-                  </Grid>
-                </Grid>
-                <Typography
-                  align="center"
-                  className={classes.sugestion}
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  or login with email address
-                </Typography>
-                <TextField
-                  className={classes.textField}
-                  error={hasError('email')}
-                  fullWidth
-                  helperText={
-                    hasError('email') ? formState.errors.email[0] : null
-                  }
-                  label="Email address"
-                  name="email"
-                  onChange={handleChange}
-                  type="text"
-                  value={formState.values.email || ''}
-                  variant="outlined"
-                />
-                <TextField
-                  className={classes.textField}
-                  error={hasError('password')}
-                  fullWidth
-                  helperText={
-                    hasError('password') ? formState.errors.password[0] : null
-                  }
-                  label="Password"
-                  name="password"
-                  onChange={handleChange}
-                  type="password"
-                  value={formState.values.password || ''}
-                  variant="outlined"
-                />
-                <Button
-                  className={classes.signInButton}
-                  color="primary"
-                  disabled={!formState.isValid}
-                  fullWidth
-                  size="large"
-                  type="submit"
-                  variant="contained"
-                >
-                  Sign in now
-                </Button>
-                <Typography color="textSecondary" variant="body1">
-                  Don't have an account?{' '}
-                  <Link component={RouterLink} to="/sign-up" variant="h6">
-                    Sign up
-                  </Link>
-                </Typography>
-              </form>
+                    <Typography color="textSecondary" variant="body1">
+                      Don't have an account?{' '}
+                      <Link component={RouterLink} to="/sign-up" variant="h6">
+                        Sign up
+                      </Link>
+                    </Typography>
+                  </Form>
+                )}
+              </Formik>
             </div>
           </div>
         </Grid>

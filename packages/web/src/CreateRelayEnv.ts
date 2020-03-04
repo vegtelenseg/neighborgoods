@@ -7,9 +7,9 @@ import {
   errorMiddleware,
   retryMiddleware,
   progressMiddleware,
-  Variables,
-  CacheConfig,
-  ConcreteBatch,
+  //Variables,
+  //CacheConfig,
+  //ConcreteBatch,
   SubscribeFunction,
   // ConcreteBatch,
 } from 'react-relay-network-modern/es'; // Changed to /lib to avoid mjs issue that fails the build
@@ -18,7 +18,7 @@ import {
   RecordSource,
   Store,
   INetwork,
-  Observable,
+  //Observable,
   // Variables,
   // CacheConfig,
 } from 'relay-runtime';
@@ -31,13 +31,14 @@ const IS_DEV_ENV = process.env.NODE_ENV === 'development';
 const serverUri = 'http://localhost:5000';
 
 type HandleLogoutFn = () => void;
-type GetAuthTokenFn = () => Promise<string>;
+type GetAuthTokenFn = () => string;
 
 function createNetworkLayer(
   handleLogout: HandleLogoutFn,
   getAuthTokenFn: GetAuthTokenFn,
   subscribeFn: SubscribeFunction
 ): INetwork {
+
   const network = new RelayNetworkLayer(
     [
       /*
@@ -49,8 +50,8 @@ function createNetworkLayer(
       urlMiddleware({
         url: () => Promise.resolve(`${serverUri}/graphql`),
         headers: {
-          Authorization: `Bearer ${getAuthTokenFn()}`
-        }
+          Authorization: `Bearer ${getAuthTokenFn()}`,
+        },
       }),
       // IS_DEV_ENV ? loggerMiddleware() : null,
       IS_DEV_ENV ? errorMiddleware() : null,
@@ -71,7 +72,7 @@ function createNetworkLayer(
       }),
       authMiddleware({
         allowEmptyToken: true,
-        token: getAuthTokenFn,
+        token: getAuthTokenFn(),
       }),
       SHOW_PROGRESS
         ? progressMiddleware({
@@ -124,58 +125,57 @@ export default function createEnv(
 ) {
   const handlerProvider = undefined;
 
-  const client = new SubscriptionClient(
-    // TODO: remove hack
-    `${serverUri}/graphql`.replace('http', 'ws'),
-    {
-      reconnect: true,
-      connectionParams: async () => {
-        const token = await getAuthTokenFn();
-        return {
-          Authorization: token,
-        };
-      },
-    }
-  );
+  // const client = new SubscriptionClient(
+  //   // TODO: remove hack
+  //   `${serverUri}/graphql`.replace('http', 'ws'),
+  //   {
+  //     reconnect: true,
+  //     connectionParams: async () => {
+  //       const token = await getAuthTokenFn();
+  //       return {
+  //         Authorization: token,
+  //       };
+  //     },
+  //   }
+  // );
 
-  const subscribeFn = (
-    config: ConcreteBatch,
-    variables: Variables,
-    _cacheConfig: CacheConfig
-  ) => {
-    return Observable.create((sink) => {
-      const result = client
-        .request({
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore
-          query: config.text,
-          operationName: config.name,
-          variables,
-        })
-        // New line for ts-ignore
-        .subscribe({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          next(v: any) {
-            sink.next(v);
-          },
-          complete() {
-            sink.complete();
-          },
-          error(error: Error) {
-            sink.error(error);
-          },
-        });
+  // const subscribeFn = (
+  //   config: ConcreteBatch,
+  //   variables: Variables,
+  //   _cacheConfig: CacheConfig
+  // ) => {
+  //   return Observable.create((sink) => {
+  //     const result = client
+  //       .request({
+  //         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  //         // @ts-ignore
+  //         query: config.text,
+  //         operationName: config.name,
+  //         variables,
+  //       })
+  //       // New line for ts-ignore
+  //       .subscribe({
+  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //         next(v: any) {
+  //           sink.next(v);
+  //         },
+  //         complete() {
+  //           sink.complete();
+  //         },
+  //         error(error: Error) {
+  //           sink.error(error);
+  //         },
+  //       });
 
-      return () => result.unsubscribe();
-    });
-  };
+  //     return () => result.unsubscribe();
+  //   });
+  // };
 
   const network = createNetworkLayer(
     handleLogout,
     getAuthTokenFn,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
-    subscribeFn
+    null
   );
   const source = new RecordSource();
   const relayStore = new Store(source);

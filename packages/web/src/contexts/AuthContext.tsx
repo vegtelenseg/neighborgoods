@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export interface AuthContextImageType {
   id: string;
@@ -31,14 +32,12 @@ export interface AuthContextStateType {
     password: string
   ) => Promise<boolean | Response | void>;
   handleLogout: (logOutMessage?: string) => void;
-  updateImage: (image: AuthContextImageType) => void;
 }
 
 export const AuthContext = createContext<AuthContextStateType>({
   auth: {authenticated: false},
   handleLogin: async () => {},
   handleLogout: () => {},
-  updateImage: () => {},
 });
 
 const serverUri = 'http://localhost:5000';
@@ -52,50 +51,48 @@ export function AuthContextProvider({children}: Props) {
   const [logOutMessage, setLogoutMessage] = useState(
     'You have been logged out'
   );
-
-  const [auth, setAuth] = useState<AuthContextType>(() => {
-    let finalResponse: AuthContextType = {authenticated: false};
-    try {
-      const data = localStorage.getItem('auth');
-      if (data) {
-        finalResponse = JSON.parse(data) as AuthContextType;
-      }
-    } catch (ex) {
-      // ignore auth
-    } finally {
-      authTokenLoaded.current = true;
-    }
-    return finalResponse;
+  const [localAuth, setLocalAuth] = useLocalStorage<AuthContextType>('auth', {
+    authenticated: false,
   });
+  const [auth, setAuth] = useState<AuthContextType>(() => {
+    authTokenLoaded.current = true;
+    return localAuth;
+  });
+  const handleLogin = React.useCallback(
+    async function(username: string, password: string) {
+      setLoggingOut(false);
 
-  async function handleLogin(
-    username: string,
-    password: string,
-    message?: string
-  ) {
-    setLoggingOut(false);
-    console.log('TRYING TO LOGIN');
-    const body = {
-      username,
-      password,
-    };
+      const body = new URLSearchParams();
+      body.set('grant_type', 'client_credentials');
 
-    // TODO: Handle login
-    const result = await fetch('');
+      // TODO: Only throws if the server cant be reached
+      const result = await fetch(`${serverUri}/login`, {
+        headers: {
+          Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        method: 'POST',
+        body,
+      });
 
-    if (result.ok) {
-      const responseObject = await result.json();
-      const token = responseObject.access_token;
-      const newAuth: AuthContextType = {authenticated: true, token, username};
-      setAuth(newAuth);
-      localStorage.setItem('auth', JSON.stringify(newAuth));
-
-      return true;
-    } else {
-      return result;
-    }
-    // TODO handle timeout
-  }
+      if (result.ok) {
+        const responseObject = await result.json();
+        const token = responseObject.accessToken;
+        const newAuth: AuthContextType = {
+          authenticated: true,
+          token,
+          username,
+        };
+        setAuth(newAuth);
+        setLocalAuth(newAuth);
+        return result;
+      } else {
+        return result;
+      }
+      // TODO handle timeout
+    },
+    [setLocalAuth]
+  );
 
   async function handleLogout(logOutMessage?: string) {
     //** sCalls useEffects
@@ -160,9 +157,7 @@ export function AuthContextProvider({children}: Props) {
   }
 
   return (
-    <AuthContext.Provider
-      value={{auth, handleLogin, handleLogout, updateImage}}
-    >
+    <AuthContext.Provider value={{auth, handleLogin, handleLogout}}>
       {children}
     </AuthContext.Provider>
   );

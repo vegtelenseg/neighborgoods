@@ -80,73 +80,73 @@ export const Sell = () => {
   };
   return (
     <Slide direction="up" in={true} mountOnEnter unmountOnExit>
-         <Box className={classes.root}>
-      <Formik<ProductDetails>
-        onSubmit={(values) => {
-          console.log('ON SUBMIT: ', values);
-        }}
-        validationSchema={Schema}
-        initialValues={{
-          images,
-          price: '',
-          unitNumber: '',
-          availableAt: '',
-        }}
-      >
-        {(formikProps) => {
-          console.log('ERRORS: ', formikProps.errors);
-          return (
-            <>
-              <Form>
-                <Dropzone
-                  onChange={handleImageSelect}
-                  onDrop={formikProps.setFieldValue}
-                  currentImages={images}
-                />
-                <Box>
-                  <OutlinedTextField
-                    type="number"
-                    label="Price"
-                    name="price"
-                    placeholder="How much is the item going for?"
+      <Box className={classes.root}>
+        <Formik<ProductDetails>
+          onSubmit={(values) => {
+            console.log('ON SUBMIT: ', values);
+          }}
+          validationSchema={Schema}
+          initialValues={{
+            images,
+            price: '',
+            unitNumber: '',
+            availableAt: '',
+          }}
+        >
+          {(formikProps) => {
+            console.log('ERRORS: ', formikProps.errors);
+            return (
+              <>
+                <Form>
+                  <Dropzone
+                    onChange={handleImageSelect}
+                    onDrop={formikProps.setFieldValue}
+                    currentImages={images}
                   />
-                </Box>
-                <Box>
-                  <OutlinedTextField
-                    label="Unit Number"
-                    type="number"
-                    name="unitNumber"
-                    placeholder="What is your unit number?"
-                  />
-                </Box>
-                <Box>
-                  <Datepicker
-                    setFieldValue={formikProps.setFieldValue}
-                    className={classes.textField}
-                    name="availableAt"
-                  />
-                </Box>
-                <Box>
-                  <Button
-                    className={classes.button}
-                    type="submit"
-                    disabled={
-                      !formikProps.isValid ||
-                      !formikProps.dirty ||
-                      formikProps.isSubmitting
-                    }
-                    variant="contained"
-                    color="primary"
-                  >
-                    Upload
-                  </Button>
-                </Box>
-              </Form>
-            </>
-          );
-        }}
-      </Formik>
-    </Box>
+                  <Box>
+                    <OutlinedTextField
+                      type="number"
+                      label="Price"
+                      name="price"
+                      placeholder="How much is the item going for?"
+                    />
+                  </Box>
+                  <Box>
+                    <OutlinedTextField
+                      label="Unit Number"
+                      type="number"
+                      name="unitNumber"
+                      placeholder="What is your unit number?"
+                    />
+                  </Box>
+                  <Box>
+                    <Datepicker
+                      setFieldValue={formikProps.setFieldValue}
+                      className={classes.textField}
+                      name="availableAt"
+                    />
+                  </Box>
+                  <Box>
+                    <Button
+                      className={classes.button}
+                      type="submit"
+                      disabled={
+                        !formikProps.isValid ||
+                        !formikProps.dirty ||
+                        formikProps.isSubmitting
+                      }
+                      variant="contained"
+                      color="primary"
+                    >
+                      Upload
+                    </Button>
+                  </Box>
+                </Form>
+              </>
+            );
+          }}
+        </Formik>
+      </Box>
     </Slide>
   );
 };
