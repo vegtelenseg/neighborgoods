@@ -92,6 +92,7 @@ export async function up(knex: Knex) {
       .string('name')
       .index()
       .notNullable();
+    table.string('image_uri').notNullable();
     auditing(knex, table);
   });
   await knex.schema.createTable('product_detail', (table: TableBuilder) => {

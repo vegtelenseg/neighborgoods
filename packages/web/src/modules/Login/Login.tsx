@@ -171,6 +171,7 @@ const SignIn = (props: any) => {
   };
 
   const handleSignIn = (event: React.ChangeEvent<EventTarget>) => {
+    console.log("STATE: ", formState.values)
     event.preventDefault();
     history.push('/');
   };

@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import {Datepicker} from '../../components/Datepicker';
 import {Dropzone} from '../../components/Dropzone';
 import {OutlinedTextField} from '../../components/TextField';
+import Slide from '@material-ui/core/Slide';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -78,7 +79,8 @@ export const Sell = () => {
     setSelectedImages(images);
   };
   return (
-    <Box className={classes.root}>
+    <Slide direction="up" in={true} mountOnEnter unmountOnExit>
+         <Box className={classes.root}>
       <Formik<ProductDetails>
         onSubmit={(values) => {
           console.log('ON SUBMIT: ', values);
@@ -145,5 +147,6 @@ export const Sell = () => {
         }}
       </Formik>
     </Box>
+    </Slide>
   );
 };

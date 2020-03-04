@@ -4,3 +4,4 @@ projects:
     extensions:
       endpoints:
         dev: 'http://localhost:5000/graphql'
+        subscription: "ws://localhost:5000/graphql"

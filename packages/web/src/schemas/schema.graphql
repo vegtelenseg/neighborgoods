@@ -1,5 +1,5 @@
 # source: http://localhost:5000/graphql
-# timestamp: Sun Feb 23 2020 21:40:26 GMT+0200 (South Africa Standard Time)
+# timestamp: Wed Mar 04 2020 17:22:46 GMT+0200 (South Africa Standard Time)
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
@@ -54,6 +54,7 @@ type ProductCategory {
   """The ID of an object"""
   id: ID!
   name: String!
+  imageUri: String!
   products: [Product!]!
 }
 

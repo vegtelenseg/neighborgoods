@@ -1,13 +1,13 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash fde9ce39be72806a66a3f4901fbfae52 */
+/* @relayHash 4aa8aa9540ba922e3da40c7fe1687184 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
 export type HomeQueryVariables = {};
 export type HomeQueryResponse = {
     readonly viewer: {
-        readonly " $fragmentRefs": FragmentRefs<"ProductCategory_categories">;
+        readonly " $fragmentRefs": FragmentRefs<"ProductCategories_categories">;
     };
 };
 export type HomeQuery = {
@@ -20,19 +20,46 @@ export type HomeQuery = {
 /*
 query HomeQuery {
   viewer {
-    ...ProductCategory_categories
+    ...ProductCategories_categories
   }
 }
 
-fragment ProductCategory_categories on Viewer {
+fragment ProductCategories_categories on Viewer {
   productsByCategory {
     name
+    imageUri
+    products {
+      id
+      detail {
+        name
+        id
+      }
+      currentAvailability {
+        availability
+        id
+      }
+    }
     id
   }
 }
 */
 
-const node: ConcreteRequest = {
+const node: ConcreteRequest = (function(){
+var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+},
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "id",
+  "args": null,
+  "storageKey": null
+};
+return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
@@ -52,7 +79,7 @@ const node: ConcreteRequest = {
         "selections": [
           {
             "kind": "FragmentSpread",
-            "name": "ProductCategory_categories",
+            "name": "ProductCategories_categories",
             "args": null
           }
         ]
@@ -82,20 +109,59 @@ const node: ConcreteRequest = {
             "concreteType": "ProductCategory",
             "plural": true,
             "selections": [
+              (v0/*: any*/),
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "name",
+                "name": "imageUri",
                 "args": null,
                 "storageKey": null
               },
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "id",
+                "name": "products",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
-              }
+                "concreteType": "Product",
+                "plural": true,
+                "selections": [
+                  (v1/*: any*/),
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "detail",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "ProductDetail",
+                    "plural": false,
+                    "selections": [
+                      (v0/*: any*/),
+                      (v1/*: any*/)
+                    ]
+                  },
+                  {
+                    "kind": "LinkedField",
+                    "alias": null,
+                    "name": "currentAvailability",
+                    "storageKey": null,
+                    "args": null,
+                    "concreteType": "ProductAvailability",
+                    "plural": false,
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "name": "availability",
+                        "args": null,
+                        "storageKey": null
+                      },
+                      (v1/*: any*/)
+                    ]
+                  }
+                ]
+              },
+              (v1/*: any*/)
             ]
           }
         ]
@@ -106,9 +172,10 @@ const node: ConcreteRequest = {
     "operationKind": "query",
     "name": "HomeQuery",
     "id": null,
-    "text": "query HomeQuery {\n  viewer {\n    ...ProductCategory_categories\n  }\n}\n\nfragment ProductCategory_categories on Viewer {\n  productsByCategory {\n    name\n    id\n  }\n}\n",
+    "text": "query HomeQuery {\n  viewer {\n    ...ProductCategories_categories\n  }\n}\n\nfragment ProductCategories_categories on Viewer {\n  productsByCategory {\n    name\n    imageUri\n    products {\n      id\n      detail {\n        name\n        id\n      }\n      currentAvailability {\n        availability\n        id\n      }\n    }\n    id\n  }\n}\n",
     "metadata": {}
   }
 };
-(node as any).hash = '9fbdaf0b67c597c9d797dc8147c93f2b';
+})();
+(node as any).hash = '3cfb9c985917036b71d3cd04d235bbad';
 export default node;

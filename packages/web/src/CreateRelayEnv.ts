@@ -48,6 +48,9 @@ function createNetworkLayer(
       */
       urlMiddleware({
         url: () => Promise.resolve(`${serverUri}/graphql`),
+        headers: {
+          Authorization: `Bearer ${getAuthTokenFn()}`
+        }
       }),
       // IS_DEV_ENV ? loggerMiddleware() : null,
       IS_DEV_ENV ? errorMiddleware() : null,

@@ -3,18 +3,13 @@ import {RelayRenderer} from '../../components/RelayRenderer';
 import graphql from 'babel-plugin-relay/macro';
 
 import {HomeQuery, HomeQueryResponse} from './__generated__/HomeQuery.graphql';
-import Box from '@material-ui/core/Box';
-import Card from '@material-ui/core/Card';
-import makeStyles from '@material-ui/styles/makeStyles';
-import Typography from '@material-ui/core/Typography';
-import {ProductCategory} from '../ProductCategory/ProductCategory';
+import {ProductCategories} from '../ProductCategories/ProductCategories';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'grid',
-    gridTemplateColumns: '6fr 6fr',
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   root: {
+//     flexGrow: 1,
+//   },
+// }));
 
 interface Props {
   data: HomeQueryResponse;
@@ -23,20 +18,15 @@ interface Props {
 const HOME_QUERY = graphql`
   query HomeQuery {
     viewer {
-      ...ProductCategory_categories
+      ...ProductCategories_categories
     }
   }
 `;
 
 const Home = (props: Props) => {
-  console.log('data: ', props.data);
   const {data: viewer} = props;
-  const classes = useStyles();
-  return (
-    <Box className={classes.root}>
-      {<ProductCategory categoriesRef={viewer.viewer} />}
-    </Box>
-  );
+  // const classes = useStyles();
+  return <ProductCategories categoriesRef={viewer.viewer} />;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -78,6 +78,9 @@ export const ProductCategory = new GraphQLObjectType({
   fields: () => ({
     id: globalIdField('ProductCategory'),
     name: {type: GraphQLNonNull(GraphQLString)},
+    imageUri: {
+      type: GraphQLNonNull(GraphQLString),
+    },
     products: {
       type: GraphQLNonNull(GraphQLList(GraphQLNonNull(Product))),
     },

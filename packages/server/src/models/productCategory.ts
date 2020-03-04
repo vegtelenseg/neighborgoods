@@ -6,6 +6,7 @@ import {Product} from './product';
 export class ProductCategory extends BaseModel<Context> {
   id!: number;
   name!: string;
+  imageUri!: string;
   products!: Partial<Product>[];
   public static relationMappings() {
     return {

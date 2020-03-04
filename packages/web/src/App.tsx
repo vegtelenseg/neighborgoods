@@ -1,7 +1,7 @@
 import React from 'react';
 import {Switch, BrowserRouter as Router, Route} from 'react-router-dom';
 import Login from './modules/Login/Login';
-import {MuiThemeProvider, Container} from '@material-ui/core';
+import {MuiThemeProvider} from '@material-ui/core';
 import {theme} from './Theme';
 import {Navigation} from './modules/Navigation/Navigation';
 import Home from './modules/Home/Home';
@@ -13,6 +13,8 @@ import createRelayEnv from './CreateRelayEnv';
 import {useAuthContextProvider} from './contexts/AuthContext';
 import {Environment} from 'react-relay';
 import _ from 'lodash';
+import Menu from './modules/Menu/Menu';
+import {Products} from './modules/Products/Products';
 
 const App = () => {
   const {auth, handleLogout} = useAuthContextProvider();
@@ -44,30 +46,32 @@ const App = () => {
   }, [auth, createEnvironment, environment]);
   return (
     <MuiThemeProvider theme={theme}>
-      <Container>
-        <RelayEnvironmentProvider environment={environment}>
-          <Router>
-            <Switch>
-              <Route path="/login" exact>
-                <Login />
-              </Route>
-              <Route path={['/buy', '/', '/home']} exact>
-                <Home />
-              </Route>
-              <Route path="/sell">
-                <Sell />
-              </Route>
-              <Route path="/cart" exact>
-                <Cart />
-              </Route>
-              <Route path="/profile">
-                <Profile />
-              </Route>
-            </Switch>
-            <Navigation />
-          </Router>
-        </RelayEnvironmentProvider>
-      </Container>
+      <RelayEnvironmentProvider environment={environment}>
+        <Router>
+          <Menu />
+          <Switch>
+            <Route path="/login" exact>
+              <Login />
+            </Route>
+            <Route path={['/buy', '/', '/home']} exact>
+              <Home />
+            </Route>
+            <Route path="/sell">
+              <Sell />
+            </Route>
+            <Route path="/cart" exact>
+              <Cart />
+            </Route>
+            <Route path="/profile">
+              <Profile />
+            </Route>
+            <Route path="/products">
+              <Products />
+            </Route>
+          </Switch>
+          <Navigation />
+        </Router>
+      </RelayEnvironmentProvider>
     </MuiThemeProvider>
   );
 };
