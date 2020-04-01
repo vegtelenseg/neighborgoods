@@ -150,6 +150,10 @@ export async function up(knex: Knex) {
       .string('created_by')
       .nullable()
       .alter();
+    table
+      .integer('reset_count')
+      .notNullable()
+      .defaultTo(0);
   });
   // add systemUser
   const [systemUser] = await knex('users')

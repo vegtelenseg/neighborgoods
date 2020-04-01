@@ -1,0 +1,4 @@
+export const REFRESH_TOKEN_SECRET =
+  'QSByZWZyZXNoIHRva2VuIGlzIHF1aXRlIGltcG9ydGFudA==';
+export const ACCESS_TOKEN_SECRET =
+  'QW4gYWNjZXNzIHRva2VuIHNlY3JldCBpcyBhIG5lY2Nlc3NpdHk=';

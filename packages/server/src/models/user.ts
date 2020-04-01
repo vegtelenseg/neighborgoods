@@ -50,6 +50,7 @@ export class User extends AggregateRoot<Context> {
   public statuses!: Partial<UserStatus>[];
   public userProducts!: Partial<UserProduct>[];
   public profile!: Partial<UserProfile>[];
+  public resetCount!: number;
 
   public static get tableName() {
     return 'users';

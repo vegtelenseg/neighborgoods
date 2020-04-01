@@ -61,29 +61,29 @@ const config = convict({
     },
   },
   oauth: {
-    secret: {
-      doc: 'Oauth Secret',
-      format: 'String',
-      default: 'DFHDFHEARGREGD',
-      env: 'OAUTH_SECRET',
-      sensitive: true,
-    },
-    google: {
-      clientId: {
-        doc: 'Google Oauth ClientId',
-        format: 'String',
-        default:
-          '942287288298-ktd9433hugca0b8rnisejc2277sva9d4.apps.googleusercontent.com',
-        env: 'GOOGLE_OAUTH_CLIENT_ID',
-      },
-      clientSecret: {
-        doc: 'Google Oauth Secret ClientSecret',
-        format: 'String',
-        default: 's3yjT30CsBLXSYGgwWOfRMwn',
-        env: 'GOOGLE_OAUTH_CLIENT_SECRET',
-        sensitive: true,
-      },
-    },
+    // secret: {
+    //   doc: 'Oauth Secret',
+    //   format: 'String',
+    //   default: 'DFHDFHEARGREGD',
+    //   env: 'OAUTH_SECRET',
+    //   sensitive: true,
+    // },
+    // google: {
+    //   clientId: {
+    //     doc: 'Google Oauth ClientId',
+    //     format: 'String',
+    //     default:
+    //       '942287288298-ktd9433hugca0b8rnisejc2277sva9d4.apps.googleusercontent.com',
+    //     env: 'GOOGLE_OAUTH_CLIENT_ID',
+    //   },
+    //   clientSecret: {
+    //     doc: 'Google Oauth Secret ClientSecret',
+    //     format: 'String',
+    //     default: 's3yjT30CsBLXSYGgwWOfRMwn',
+    //     env: 'GOOGLE_OAUTH_CLIENT_SECRET',
+    //     sensitive: true,
+    //   },
+    // },
   },
 });
 

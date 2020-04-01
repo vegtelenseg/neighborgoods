@@ -65,6 +65,44 @@ export class UserService {
     }
   }
 
+  public static async findByUsernameAndPassword(
+    context: Context,
+    {username, password}: UserCredentials,
+    trx?: Transaction
+  ): Promise<User | undefined> {
+    try {
+      const user = await User.query(trx)
+        .context(context)
+        .eager(USER_EAGER_RELATIONS)
+        .whereExists(
+          UserStatus.query()
+            .whereColumn('users.id', 'userStatus.userId')
+            .andWhere({state: PointInTimeState.active})
+        )
+        .where({
+          username,
+          password,
+        })
+        .findOne(true);
+      console.log('USER:SERVICE: ', user);
+      return user;
+    } catch (err) {
+      throw new Error(`User with username ${username} could not be found.`);
+    }
+  }
+
+  public static async updateResetCount(
+    context: Context,
+    refreshTokenCount: number
+  ) {
+    try {
+      await User.query()
+        .context(context)
+        .updateAndFetch({
+          resetCount: refreshTokenCount,
+        });
+    } catch (error) {}
+  }
   public static async GenerateToken(
     context: Context,
     username: string,

@@ -7,7 +7,17 @@ import {ProductCategory} from '../../models/productCategory';
 import {categoryData} from './categories/categoryData';
 
 export async function seed(knex: Knex) {
+  await knex('user_status').del();
+  await knex('user_profile').del();
+  await knex('product_availability').del();
+  await knex('product_schedule').del();
+  await knex('user_product').del();
+  await knex('product_status').del();
+  await knex('product_detail').del();
   await knex('product_category').del();
+  await knex('product').del();
+  await knex('users').del();
+
   const createSeedContext = async () => {
     return {
       user: {
@@ -166,7 +176,7 @@ export async function seed(knex: Knex) {
   });
   const user1Info: CreateUserOptions = {
     credentials: {
-      username: '1000',
+      username: 'a@a.com',
       password: 'password',
     },
     profile: {

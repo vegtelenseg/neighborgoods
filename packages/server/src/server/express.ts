@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import {Request, NextFunction, Response} from 'express';
+import {NextFunction, Response} from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
@@ -8,87 +8,186 @@ import schema from '../schema';
 import tracer from '../tracer';
 import {createContext} from '../util';
 import {UserService} from '../services/UserService';
-import {User} from '../models';
+import {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} from './constants';
 const bodyParser = require('body-parser');
 const express = require('express');
+import path from 'path';
 
 const app = express();
 
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+app.use(bodyParser());
 app.use(cors());
 app.use(helmet());
 
-const authenticateJWT = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+// @ts-ignore
+const authenticateJWT = async (req: any, res: Response, next: NextFunction) => {
+  // @ts-ignore
+  console.log('COOKIES: ', req.user);
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
 
-    jwt.verify(token, 'secret', (err: any, user: any) => {
+    // TODO:  First check if refreshtoken is valid.
+    // If valid then continue with code below, otherwise
+    // Send them login page.
+    jwt.verify(token, ACCESS_TOKEN_SECRET, (err: any, user: any) => {
       if (err) {
-        return res.json({message: 'Sorry. You are not logged in.'});
+        return res.json({
+          message: 'Sorry. You are not logged in. ' + err.message,
+        });
       }
       // @ts-ignore
-      req.user = user;
+      req.user = {
+        username: user.username,
+        id: user.id,
+      };
       return next();
     });
   }
 };
 
-app.post('/graphql', authenticateJWT);
-app.post('/login', async (req: Request, res: Response) => {
-  const authHeader = req.headers.authorization!;
-  const encodedredentials = authHeader.split(' ')[1];
+app.use(express.static(path.join(__dirname, 'build')));
+
+app.get('/*', (_req: any, res: any) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+// app.use('/graphql', authenticateJWT)
+const decodeCreds = (token: string) => {
+  const encodedredentials = token.split(' ')[1];
   const decodedCredentials = Buffer.from(
     encodedredentials,
     'base64'
   ).toString();
+  return decodedCredentials;
+};
+
+app.post('/login', async (req: any, res: Response) => {
+  const authHeader = req.headers.authorization!;
+  const decodedCredentials = decodeCreds(authHeader);
   const [username, password] = decodedCredentials.split(':');
-  // @ts-ignore
-  console.log('REQ.USER: ', req.user);
   const context = createContext(req);
-  const accessTokenSecret = 'secret';
-  const user = (await User.query().context(context)).find(
-    (user) => user.username === username && user.password === password
+  const credentials = {
+    username,
+    password,
+  };
+  const user = await UserService.findByUsernameAndPassword(
+    context,
+    credentials
   );
   if (user) {
+    // TODO: Store these in .env;
+    const accessTokenSecret = ACCESS_TOKEN_SECRET;
+    const refreshTokenSecret = REFRESH_TOKEN_SECRET;
     const accessToken = jwt.sign(
       {username: user.username, id: user.id},
-      accessTokenSecret
+      accessTokenSecret,
+      {
+        expiresIn: '1d',
+      }
     );
-    res.json({
+    const refreshTokenCount = user.resetCount + 1;
+    const refreshToken = jwt.sign(
+      {username: user.username, id: user.id, count: refreshTokenCount},
+      refreshTokenSecret,
+      {
+        expiresIn: '7d',
+      }
+    );
+    await UserService.updateResetCount(context, refreshTokenCount);
+    res.send({
+      refreshToken,
       accessToken,
     });
   } else {
     res.send('Username or password incorrect');
+    return;
   }
 });
 
+app.post('/refreshToken', async (req: any, res: any, next: NextFunction) => {
+  console.log('BODY: ', req.body);
+  if (req.body && req.body.refreshToken) {
+    const {refreshToken} = req.body;
+
+    if (!refreshToken) {
+      next();
+    }
+
+    try {
+      const decoded = jwt.decode(refreshToken) as {
+        [key: string]: any;
+      };
+      console.log('REFRESH DECODE: ', decoded);
+      if (decoded) {
+        req.user = {
+          // @ts-ignore
+          id: decoded['id'],
+          // @ts-ignore
+          username: decoded['username'],
+        };
+      }
+      jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+      const context = createContext(req);
+      const user = await UserService.findByUsername(
+        context,
+        decoded['username']
+      );
+      // @ts-ignore
+      if (user && user.resetCount === decoded.count) {
+        const newAccessToken = jwt.sign(
+          {id: user.id, username: user.username},
+          ACCESS_TOKEN_SECRET
+        );
+        const newRefreshToken = jwt.sign(
+          {id: user.id, username: user.username, count: user.resetCount + 1},
+          REFRESH_TOKEN_SECRET
+        );
+        res.send({
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        });
+      }
+    } catch (error) {
+      res.status(401);
+      next();
+      console.log('Token not good: ', error.message);
+    }
+  }
+});
 const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
-  context: async ({req, connection}: {req: Request; connection: any}) => {
-    const ctx = createContext(req);
-    if (connection) {
-      const {token} = connection.context;
+  context: async ({req, res}: {req: any; res: Response}) => {
+    if (req.headers.authorization) {
+      const authHeader = req.headers.authorization;
+      const [, token] = authHeader.split(' ');
 
       if (!token) {
         return {};
       }
 
-      const decoded: any = jwt.verify(token, 'secret');
-      const user = await UserService.findByUsername(ctx, decoded.username);
-      return {user};
+      try {
+        const decoded = jwt.decode(token);
+        console.log('RESULT DECODE: ', decoded);
+        if (decoded) {
+          req.user = {
+            // @ts-ignore
+            id: decoded.id,
+            // @ts-ignore
+            username: decoded.username,
+          };
+        }
+        jwt.verify(token, ACCESS_TOKEN_SECRET);
+      } catch (error) {
+        res.status(401);
+
+        console.log('Token not good: ', error.message);
+      }
     } else {
-      return ctx;
+      req.user = {};
     }
+    return createContext(req);
   },
   // TODO: disable these in future
   introspection: true,

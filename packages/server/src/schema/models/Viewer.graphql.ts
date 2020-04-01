@@ -46,6 +46,7 @@ export default new GraphQLObjectType({
         },
       },
       resolve: async (_parent, args, context) => {
+        console.log('CONTEXT: ', context.user);
         const {linkedToUser} = args;
         if (linkedToUser !== null) {
           return await ProductService.fetchProductsByCategory(

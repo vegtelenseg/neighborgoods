@@ -28,11 +28,16 @@ const App = () => {
         handleLogout();
       },
       () => {
-        console.log('CREATE ENV: ', auth);
         if (auth.authenticated) {
-          return auth.token;
+          return {
+            accessToken: auth.token,
+            refreshToken: auth.refreshToken
+          };
         } else {
-          return '';
+          return {
+            accessToken: '',
+            refreshToken: ''
+          };
         }
       }
     );

@@ -174,6 +174,7 @@ const SignIn = (props: any) => {
                 }}
                 validationSchema={Schema}
                 onSubmit={async (values, formikHelpers) => {
+                  console.log('values: ', values);
                   const response = await handleLogin(
                     values.email,
                     values.password
@@ -238,7 +239,7 @@ const SignIn = (props: any) => {
                       }
                       label="Email address"
                       name="email"
-                      // onChange={formikProps.handleChange}
+                      onChange={formikProps.handleChange}
                       type="text"
                       // value={formState.values.email || ''}
                       variant="outlined"
@@ -255,7 +256,7 @@ const SignIn = (props: any) => {
                       }
                       label="Password"
                       name="password"
-                      // onChange={formikProps.handleChange}
+                      onChange={formikProps.handleChange}
                       type="password"
                       // value={formState.values.password || ''}
                       variant="outlined"

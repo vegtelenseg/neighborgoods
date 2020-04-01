@@ -25,10 +25,7 @@ export const Product = new GraphQLObjectType({
     id: globalIdField('Product'),
     detail: {
       type: GraphQLNonNull(ProductDetail),
-      resolve: (parent) => {
-        console.log('DETAIL PARENT: ', parent);
-        return parent.activeDetail;
-      },
+      resolve: (parent) => parent.activeDetail,
     },
     currentAvailability: {
       type: GraphQLNonNull(ProductAvailability),

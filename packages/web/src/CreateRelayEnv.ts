@@ -31,14 +31,15 @@ const IS_DEV_ENV = process.env.NODE_ENV === 'development';
 const serverUri = 'http://localhost:5000';
 
 type HandleLogoutFn = () => void;
-type GetAuthTokenFn = () => string;
+type GetAuthTokens = () => {accessToken:string; refreshToken: string};
 
 function createNetworkLayer(
   handleLogout: HandleLogoutFn,
-  getAuthTokenFn: GetAuthTokenFn,
+  getAuthTokens: GetAuthTokens,
   subscribeFn: SubscribeFunction
 ): INetwork {
 
+  console.log("Creating env relay")
   const network = new RelayNetworkLayer(
     [
       /*
@@ -49,14 +50,17 @@ function createNetworkLayer(
       */
       urlMiddleware({
         url: () => Promise.resolve(`${serverUri}/graphql`),
-        headers: {
-          Authorization: `Bearer ${getAuthTokenFn()}`,
-        },
+        // headers: {
+        //   Authorization: `Bearer`,
+        // },
+        credentials: 'include'
       }),
+    
       // IS_DEV_ENV ? loggerMiddleware() : null,
       IS_DEV_ENV ? errorMiddleware() : null,
       // IS_DEV_ENV ? perfMiddleware() : null,
       retryMiddleware({
+        allowFormData: true,
         fetchTimeout: 45000,
         retryDelays: [3200, 6400, 12800],
         forceRetry: (cb, delay) => {
@@ -71,8 +75,24 @@ function createNetworkLayer(
         statusCodes: [500, 503, 504],
       }),
       authMiddleware({
-        allowEmptyToken: true,
-        token: getAuthTokenFn(),
+        allowEmptyToken: false,
+        token: getAuthTokens().accessToken,
+        tokenRefreshPromise: async (req, err, ) => {
+          // const authHeader = req.fetchOpts.headers['Authorization'];
+          const refreshToken = getAuthTokens().refreshToken;
+          console.log("REFRESH TOKEN: ", refreshToken);
+          const newToken = await fetch(`${serverUri}/refreshToken`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+              Accept: 'application/json', // eslint-disable-line
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({'refreshToken': refreshToken}) 
+          })
+          console.log("NEW TOKEN: ", newToken );
+          return newToken.json()
+        }
       }),
       SHOW_PROGRESS
         ? progressMiddleware({
@@ -100,7 +120,7 @@ function createNetworkLayer(
         } catch (ex) {
           // Logout user out if we get a 401
           if (ex.res && ex.res.status === 401) {
-            handleLogout();
+           // handleLogout();
           } else {
             // Report error
             bugsnagClient.notify(ex);
@@ -121,7 +141,7 @@ function createNetworkLayer(
 
 export default function createEnv(
   handleLogout: HandleLogoutFn,
-  getAuthTokenFn: GetAuthTokenFn
+  getAuthTokens: GetAuthTokens
 ) {
   const handlerProvider = undefined;
 
@@ -173,7 +193,7 @@ export default function createEnv(
 
   const network = createNetworkLayer(
     handleLogout,
-    getAuthTokenFn,
+    getAuthTokens,
     // @ts-ignore
     null
   );

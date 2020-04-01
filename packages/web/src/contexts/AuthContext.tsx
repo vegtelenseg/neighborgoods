@@ -17,6 +17,7 @@ export interface AuthContextImageType {
 export type AuthContextType =
   | {
       token: string;
+      refreshToken: string;
       authenticated: true;
       username: string;
       profilePic?: AuthContextImageType;
@@ -78,13 +79,15 @@ export function AuthContextProvider({children}: Props) {
       if (result.ok) {
         const responseObject = await result.json();
         const token = responseObject.accessToken;
+        const refreshToken = responseObject.refreshToken;
         const newAuth: AuthContextType = {
           authenticated: true,
           token,
+          refreshToken,
           username,
         };
-        setAuth(newAuth);
         setLocalAuth(newAuth);
+        setAuth(newAuth);
         return result;
       } else {
         return result;
@@ -128,11 +131,6 @@ export function AuthContextProvider({children}: Props) {
     }
   }, [loggingOut, doLogout, logOutMessage]);
 
-  function updateImage(image: AuthContextImageType) {
-    if (auth.authenticated) setAuth({profilePic: image, ...auth});
-    localStorage.setItem('auth', JSON.stringify({profilePic: image, ...auth}));
-  }
-
   useEffect(() => {
     const authString = localStorage.getItem('auth') as string;
     const localAuth = JSON.parse(authString);
@@ -144,8 +142,8 @@ export function AuthContextProvider({children}: Props) {
       auth = {
         authenticated: localAuth.authenticated,
         token: localAuth.token,
+        refreshToken: localAuth.refreshToken,
         username: localAuth.username,
-        profilePic: localAuth.profilePic,
       };
       setAuth(auth);
     }
