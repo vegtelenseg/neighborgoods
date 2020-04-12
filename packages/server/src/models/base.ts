@@ -7,8 +7,8 @@ import {
   QueryContext,
 } from 'objection';
 import Knex from 'knex';
-import {BaseContext} from '../context';
 import {Span} from 'opentracing';
+import {BaseContext} from '../context';
 import {knex} from '../db';
 
 Model.knex(knex);

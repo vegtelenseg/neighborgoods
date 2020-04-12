@@ -4,6 +4,8 @@ import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
 import helmet from 'helmet';
+import io from 'socket.io';
+import http from 'http';
 import schema from '../schema';
 import tracer from '../tracer';
 import {createContext} from '../util';
@@ -11,8 +13,6 @@ import {UserService} from '../services/UserService';
 import {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} from './constants';
 const bodyParser = require('body-parser');
 const express = require('express');
-import io from 'socket.io';
-import http from 'http';
 const app = express();
 
 app.use(bodyParser());

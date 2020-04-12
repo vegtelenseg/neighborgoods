@@ -1,10 +1,10 @@
 import {transaction, Transaction} from 'objection';
+import jwt from 'jsonwebtoken';
 import {User} from '../models';
 import Context from '../context';
 import {addActiveStatusFields} from './helpers';
 import {PointInTimeState} from '../models/base';
 import {UserStatus} from '../models/user';
-import jwt from 'jsonwebtoken';
 
 // const USER_EAGER_RELATIONS = '[profile(active), statuses(active)]';
 
