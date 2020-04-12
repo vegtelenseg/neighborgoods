@@ -46,6 +46,20 @@ const config = convict({
       default: true,
     },
   },
+  redis: {
+    host: {
+      doc: 'Redis hostname',
+      format: 'String',
+      default: '127.0.0.1',
+      env: 'REDIS_HOST',
+    },
+    port: {
+      doc: 'Redis port',
+      format: 'port',
+      default: 6379,
+      env: 'REDIS_PORT',
+    },
+  },
   jaeger: {
     enabled: {
       doc: 'Jeager Tracing Enabled',

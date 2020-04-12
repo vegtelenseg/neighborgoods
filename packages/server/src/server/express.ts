@@ -11,18 +11,17 @@ import {UserService} from '../services/UserService';
 import {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} from './constants';
 const bodyParser = require('body-parser');
 const express = require('express');
-import path from 'path';
-
+import io from 'socket.io';
+import http from 'http';
 const app = express();
 
 app.use(bodyParser());
 app.use(cors());
 app.use(helmet());
+const server = http.createServer(app);
 
 // @ts-ignore
 const authenticateJWT = async (req: any, res: Response, next: NextFunction) => {
-  // @ts-ignore
-  console.log('COOKIES: ', req.user);
   const authHeader = req.headers.authorization;
   if (authHeader) {
     const token = authHeader.split(' ')[1];
@@ -46,10 +45,9 @@ const authenticateJWT = async (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-app.use(express.static(path.join(__dirname, 'build')));
-
-app.get('/*', (_req: any, res: any) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+const socket = io(server);
+socket.on('connection', function(socket) {
+  console.log('a user connected: ', socket.id);
 });
 
 // app.use('/graphql', authenticateJWT)
@@ -106,7 +104,6 @@ app.post('/login', async (req: any, res: Response) => {
 });
 
 app.post('/refreshToken', async (req: any, res: any, next: NextFunction) => {
-  console.log('BODY: ', req.body);
   if (req.body && req.body.refreshToken) {
     const {refreshToken} = req.body;
 
@@ -118,7 +115,6 @@ app.post('/refreshToken', async (req: any, res: any, next: NextFunction) => {
       const decoded = jwt.decode(refreshToken) as {
         [key: string]: any;
       };
-      console.log('REFRESH DECODE: ', decoded);
       if (decoded) {
         req.user = {
           // @ts-ignore
@@ -169,7 +165,6 @@ const apolloServer = new ApolloServer({
 
       try {
         const decoded = jwt.decode(token);
-        console.log('RESULT DECODE: ', decoded);
         if (decoded) {
           req.user = {
             // @ts-ignore
@@ -179,6 +174,9 @@ const apolloServer = new ApolloServer({
           };
         }
         jwt.verify(token, ACCESS_TOKEN_SECRET);
+        socket.emit('message', {
+          message: 'Yea',
+        });
       } catch (error) {
         res.status(401);
 
@@ -209,7 +207,6 @@ const apolloServer = new ApolloServer({
 });
 apolloServer.applyMiddleware({app, path: '/graphql', bodyParserConfig: true});
 const port = 5000;
-
-app.listen(port, () =>
+server.listen(port, () =>
   console.log(`🚀 Server ready at http://localhost:${port}/graphql`)
 );

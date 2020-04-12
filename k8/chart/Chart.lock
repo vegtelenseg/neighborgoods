@@ -1,0 +1,12 @@
+dependencies:
+- name: app
+  repository: https://raw.githubusercontent.com/stackworx/charts/master
+  version: 0.2.3
+- name: app
+  repository: https://raw.githubusercontent.com/stackworx/charts/master
+  version: 0.2.3
+- name: mssql-linux
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 0.10.1
+digest: sha256:829c1a9f702b65762622e5ae4222c697a7ad392327afce09df33835fcdf867c6
+generated: "2019-12-21T18:40:31.895903+02:00"

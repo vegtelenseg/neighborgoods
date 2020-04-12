@@ -13,11 +13,9 @@ async function retrieveById(context: Context, type: string, id: number) {
         context,
         id
       );
-      console.log('PRODUCTS: ', productsCategory);
       return productsCategory;
     }
     default:
-      console.log('PRODUC: ');
       break;
   }
   return null;

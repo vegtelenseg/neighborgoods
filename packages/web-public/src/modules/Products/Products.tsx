@@ -8,6 +8,8 @@ import {makeStyles, Theme, createStyles, Box} from '@material-ui/core';
 import {red} from '@material-ui/core/colors';
 import Product from '../../components/Product';
 import Error from '../../components/Error';
+import Typography from '@material-ui/core/Typography';
+import socketIOClient from 'socket.io-client';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,6 +43,7 @@ const PRODUCT_QUERY = graphql`
   query ProductsQuery($id: ID!) {
     node(id: $id) {
       ... on ProductCategory {
+        name
         products {
           id
           detail {
@@ -59,12 +62,19 @@ const PRODUCT_QUERY = graphql`
 export const Products = (props: Props) => {
   const classes = useStyles();
 
+  React.useEffect(() => {
+    const socket = socketIOClient('http://localhost:5000', {});
+    socket.on('message', (data: any) => console.log('DATA: ', data));
+  });
   const {data} = props;
   const {node} = data;
   if (node && node.products) {
     const {products} = node;
     return (
       <Box m={2}>
+        <Box mb={2}>
+          <Typography variant="h4">{node.name}</Typography>
+        </Box>
         {products.map((product) => {
           return (
             <Product

@@ -1,0 +1,63 @@
+web-public:
+  ingress:
+    hosts:
+      - neighborgoods.azure.vegtelenseg.dev
+    annotations:
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/redirect-entry-point: https
+  env:
+    APP_SERVER_URI: "https://api.neighborgoods.azure.vegtelenseg.dev"
+    APP_STAGE: "development"
+    # APP_DIRECTLINE_TOKEN_ENDPOINT: "https://aa-bt-dev-hrsschatbot.azurewebsites.net/token-generate"
+  secrets:
+    - name: APP_APPLICATION_ID
+      ref:
+        name: azure-app-registration
+        key: client-id
+  nodeSelector:
+
+web-server:
+  ingress:
+    hosts:
+      - api.neighborgoods.azure.vegtelenseg.dev
+  env:
+    APP_STAGE: "development"
+    POSTGRES_USERNAME: "sspuser"
+    POSTGRES_HOST: "ea-aa-ssdb-dev.database.windows.net"
+    POSTGRES_DATABASE: "aa-db-dev-neighborgoods"
+    POSTGRES_ENCRYPT: "true"
+    REDIS_HOST: "neighborgoods-redis-master"
+    PORT: "80"
+    DEBUG_PORT: "8080"
+  secrets:
+    - name: POSTGRES_PASSWORD
+      ref:
+        name: postgres
+        key: password
+    - name: AZURE_APP_CLIENT_ID
+      ref:
+        name: azure-app-registration
+        key: client-id
+    - name: AZURE_APP_CLIENT_SECRET
+      ref:
+        name: azure-app-registration
+        key: client-secret
+    # - name: AZURE_TENANT_ID
+    #   ref:
+    #     name: azure-app-registration
+    #     key: tenant-id
+    # - name: AZURE_BOT_SECRET
+    #   ref:
+    #     name: azure-bot
+    #     key: secret
+  nodeSelector:
+
+mssql:
+  enabled: false
+
+redis:
+  master:
+    nodeSelector:
+
+  metrics:
+    nodeSelector:

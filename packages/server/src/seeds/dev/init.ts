@@ -172,6 +172,8 @@ export async function seed(knex: Knex) {
   const product9 = await ProductService.create(context, {
     categoryId: category9.id,
     name: 'Mercedes-Benz Engine',
+    description:
+      'Designed to give reliable service under prolonged hard use, the iron block/aluminum head engine featured deep water jackets',
     price: '50000',
   });
   await ProductService.updateAvailability(context, {

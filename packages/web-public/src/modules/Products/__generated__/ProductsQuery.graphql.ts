@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash e9c8af542b3866149bc9eff2c33fc7fe */
+/* @relayHash 53b5ca8ca10720fd2e60eaf260082d19 */
 
 import { ConcreteRequest } from "relay-runtime";
 export type ProductAvailabilityEnum = "AVAILABLE" | "SOLD" | "%future added value";
@@ -9,6 +9,7 @@ export type ProductsQueryVariables = {
 };
 export type ProductsQueryResponse = {
     readonly node: {
+        readonly name?: string;
         readonly products?: ReadonlyArray<{
             readonly id: string;
             readonly detail: {
@@ -36,6 +37,7 @@ query ProductsQuery(
   node(id: $id) {
     __typename
     ... on ProductCategory {
+      name
       products {
         id
         detail {
@@ -74,14 +76,14 @@ v1 = [
 v2 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "id",
+  "name": "name",
   "args": null,
   "storageKey": null
 },
 v3 = {
   "kind": "ScalarField",
   "alias": null,
-  "name": "name",
+  "name": "id",
   "args": null,
   "storageKey": null
 },
@@ -128,6 +130,7 @@ return {
             "kind": "InlineFragment",
             "type": "ProductCategory",
             "selections": [
+              (v2/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -137,7 +140,7 @@ return {
                 "concreteType": "Product",
                 "plural": true,
                 "selections": [
-                  (v2/*: any*/),
+                  (v3/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -147,7 +150,7 @@ return {
                     "concreteType": "ProductDetail",
                     "plural": false,
                     "selections": [
-                      (v3/*: any*/),
+                      (v2/*: any*/),
                       (v4/*: any*/),
                       (v5/*: any*/)
                     ]
@@ -193,11 +196,12 @@ return {
             "args": null,
             "storageKey": null
           },
-          (v2/*: any*/),
+          (v3/*: any*/),
           {
             "kind": "InlineFragment",
             "type": "ProductCategory",
             "selections": [
+              (v2/*: any*/),
               {
                 "kind": "LinkedField",
                 "alias": null,
@@ -207,7 +211,7 @@ return {
                 "concreteType": "Product",
                 "plural": true,
                 "selections": [
-                  (v2/*: any*/),
+                  (v3/*: any*/),
                   {
                     "kind": "LinkedField",
                     "alias": null,
@@ -217,10 +221,10 @@ return {
                     "concreteType": "ProductDetail",
                     "plural": false,
                     "selections": [
-                      (v3/*: any*/),
+                      (v2/*: any*/),
                       (v4/*: any*/),
                       (v5/*: any*/),
-                      (v2/*: any*/)
+                      (v3/*: any*/)
                     ]
                   },
                   {
@@ -233,7 +237,7 @@ return {
                     "plural": false,
                     "selections": [
                       (v6/*: any*/),
-                      (v2/*: any*/)
+                      (v3/*: any*/)
                     ]
                   }
                 ]
@@ -248,10 +252,10 @@ return {
     "operationKind": "query",
     "name": "ProductsQuery",
     "id": null,
-    "text": "query ProductsQuery(\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ... on ProductCategory {\n      products {\n        id\n        detail {\n          name\n          description\n          price\n          id\n        }\n        currentAvailability {\n          availability\n          id\n        }\n      }\n    }\n    id\n  }\n}\n",
+    "text": "query ProductsQuery(\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ... on ProductCategory {\n      name\n      products {\n        id\n        detail {\n          name\n          description\n          price\n          id\n        }\n        currentAvailability {\n          availability\n          id\n        }\n      }\n    }\n    id\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
-(node as any).hash = '3f02164eca6cc9522394207c62e7ec92';
+(node as any).hash = '64eb8f1f7371cb878b0a940e0636e0da';
 export default node;

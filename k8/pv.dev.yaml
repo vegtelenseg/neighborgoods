@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neighborgoods-postgres-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  claimRef:
+    kind: PersistentVolumeClaim
+    name: neighborgoods-postgres-backup
+    namespace: app-neighborgoods
+  hostPath:
+    path: /var/volumes/neighborgoods/postgres/backup
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neighborgoods-postgres-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  claimRef:
+    kind: PersistentVolumeClaim
+    name: neighborgoods-postgres-data
+    namespace: app-neighborgoods
+  hostPath:
+    path: /var/volumes/neighborgoods/postgres/data
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neighborgoods-postgres-master
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  claimRef:
+    kind: PersistentVolumeClaim
+    name: neighborgoods-postgres-master
+    namespace: app-neighborgoods
+  hostPath:
+    path: /var/volumes/neighborgoods/postgres/master
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: neighborgoods-postgres-translog
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  claimRef:
+    kind: PersistentVolumeClaim
+    name: neighborgoods-postgres-translog
+    namespace: app-neighborgoods
+  hostPath:
+    path: /var/volumes/neighborgoods/postgres/translog
+  persistentVolumeReclaimPolicy: Retain

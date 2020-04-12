@@ -57,6 +57,7 @@
     "express-prom-bundle": "^5.1.5",
     "graphql": "^14.5.8",
     "graphql-iso-date": "^3.6.1",
+    "graphql-redis-subscriptions": "^2.2.1",
     "graphql-relay": "^0.6.0",
     "grpc": "^1.24.2",
     "helmet": "^3.21.2",
@@ -68,7 +69,8 @@
     "objection-graphql-relay": "^0.0.9",
     "opentracing": "^0.14.4",
     "pg": "^7.18.1",
-    "pg-range": "^1.1.0"
+    "pg-range": "^1.1.0",
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.7.1",
@@ -93,6 +95,7 @@
     "@types/node": "^12.12.7",
     "@types/pg": "^7.14.1",
     "@types/pino": "^5.15.1",
+    "@types/socket.io": "^2.1.4",
     "@types/strange": "^1.7.0",
     "@typescript-eslint/eslint-plugin": "^2.6.1",
     "@typescript-eslint/parser": "^2.6.1",

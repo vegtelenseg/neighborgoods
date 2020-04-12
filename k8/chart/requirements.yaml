@@ -1,0 +1,18 @@
+dependencies:
+  - name: app
+    version: "0.3.0"
+    repository: "https://raw.githubusercontent.com/vegtelenseg/charts/master"
+    alias: web-public
+  - name: app
+    version: "0.3.0"
+    repository: "https://raw.githubusercontent.com/vegtelenseg/charts/master"
+    alias: web-server
+  - name: mssql-linux
+    version: "0.10.1"
+    repository: "https://kubernetes-charts.storage.googleapis.com"
+    condition: postgres.enabled
+    alias: postgres
+  - name: redis
+    condition: redis.enabled
+    version: "9.5.2"
+    repository: "https://kubernetes-charts.storage.googleapis.com"

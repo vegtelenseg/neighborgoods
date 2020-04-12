@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-web-public
+  labels:
+    app: web-public
+    chart: web-public-0.2.0
+    release: RELEASE-NAME
+    heritage: Helm
+  annotations:
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: web-public
+      release: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app: web-public
+        release: RELEASE-NAME
+      annotations:
+        checksum/config: bedae8bcc82aeb490103d7fb215f80a8881560fa7bc4d744d15a910bdb0b671e
+    spec:
+      imagePullSecrets:
+        - name: RELEASE-NAME-web-public-registrykey
+      containers:
+        - name: web-public
+          image: "registry.gitlab.com/stackworx.io/angloamerican/self-service-portal/web-public:d8406e434d6593e96f8d154e2339dce430458ad0"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: RELEASE-NAME-web-public-env
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            # Port for debug, prometheus etc
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+              # timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+              # timeoutSeconds: 10
+          resources: {}
+      nodeSelector:
+        type: apps

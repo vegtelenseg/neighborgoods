@@ -1,0 +1,9 @@
+web-server:
+  ingress:
+    traefikV2:
+      enabled: true
+
+web-public:
+  ingress:
+    traefikV2:
+      enabled: true
