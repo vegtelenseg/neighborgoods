@@ -1,12 +1,12 @@
 web-public:
   ingress:
     hosts:
-      - neighborgoods.azure.vegtelenseg.dev
+      - neighborgoods.azure.think.dev
     annotations:
       kubernetes.io/ingress.class: traefik
       traefik.ingress.kubernetes.io/redirect-entry-point: https
   env:
-    APP_SERVER_URI: "https://api.neighborgoods.azure.vegtelenseg.dev"
+    APP_SERVER_URI: "https://api.neighborgoods.azure.think.dev"
     APP_STAGE: "development"
     # APP_DIRECTLINE_TOKEN_ENDPOINT: "https://aa-bt-dev-hrsschatbot.azurewebsites.net/token-generate"
   secrets:
@@ -19,7 +19,7 @@ web-public:
 web-server:
   ingress:
     hosts:
-      - api.neighborgoods.azure.vegtelenseg.dev
+      - api.neighborgoods.azure.think.dev
   env:
     APP_STAGE: "development"
     POSTGRES_USERNAME: "sspuser"

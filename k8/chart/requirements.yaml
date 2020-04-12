@@ -1,11 +1,11 @@
 dependencies:
   - name: app
     version: "0.3.0"
-    repository: "https://raw.githubusercontent.com/vegtelenseg/charts/master"
+    repository: "https://raw.githubusercontent.com/think/charts/master"
     alias: web-public
   - name: app
     version: "0.3.0"
-    repository: "https://raw.githubusercontent.com/vegtelenseg/charts/master"
+    repository: "https://raw.githubusercontent.com/think/charts/master"
     alias: web-server
   - name: mssql-linux
     version: "0.10.1"

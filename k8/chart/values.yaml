@@ -17,8 +17,8 @@ web-public:
   env:
     APP_SERVER_URI: "https://api.selfservice.angloamerican.stackworx.dev"
     APP_STAGE: "development"
-    APP_DIRECTLINE_TOKEN_ENDPOINT: "https://bot.angloamerican.stackworx.dev/token-generate"
-    APP_DIRECTLINE_ENDPOINT: "https://directline.angloamerican.stackworx.dev/v3/directline"
+    # APP_DIRECTLINE_TOKEN_ENDPOINT: "https://bot.angloamerican.stackworx.dev/token-generate"
+    # APP_DIRECTLINE_ENDPOINT: "https://directline.angloamerican.stackworx.dev/v3/directline"
   secrets:
     - name: APP_APPLICATION_ID
       ref:

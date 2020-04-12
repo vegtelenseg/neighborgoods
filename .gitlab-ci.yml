@@ -1,0 +1,109 @@
+image: node:12.14
+
+variables:
+  REGISTRY_IMAGE: registry.gitlab.com/think/neighborgoods
+
+stages:
+  - build
+  # - e2e
+  - image
+  - deploy
+  # - release
+
+# Base Configs
+.image:
+  stage: image
+  tags:
+    - docker
+  image: docker:latest
+  variables:
+    DOCKER_DRIVER: overlay2
+  cache:
+    policy: pull
+  services:
+    - docker:dind
+  only:
+    - master
+
+.helm:
+  tags:
+    - docker
+  image:
+    name: alpine/helm:3.0.2
+    entrypoint: [""]
+
+build:
+  stage: build
+  tags:
+    - docker
+  cache:
+    paths:
+      - packages/web-public/node_modules/
+      - packages/server/node_modules/
+      # - packages/e2e/node_modules/
+  artifacts:
+    paths:
+      - packages/server/node_modules/
+      - packages/server/build/
+      - packages/web-public/build/
+      # - packages/e2e/node_modules/
+  script:
+    # - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
+    - make dependencies
+    - make --jobs --output-sync=recurse
+
+build:chart:
+  extends: .helm
+  stage: build
+  script:
+    - cd k8/chart
+    - helm lint --values values.yaml
+
+# e2e:
+#   stage: e2e
+#   cache:
+#     policy: pull
+#   tags:
+#     - docker
+#   dependencies:
+#     - build
+#   variables:
+#     SA_PASSWORD: Strong_!_Password
+#     ACCEPT_EULA: "Y"
+#   services:
+#     - name: mcr.microsoft.com/mssql/server:2019-GA-ubuntu-16.04
+#       alias: mssql
+#     - redis:5.0.4
+#   artifacts:
+#     reports:
+#       junit: ./packages/server/junit.xml
+#   script:
+#     - ./scripts/e2e.sh
+
+image:web-public:
+  extends: .image
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build --build-arg NPM_TOKEN=${NPM_TOKEN} --tag $REGISTRY_IMAGE/web-public:$CI_COMMIT_SHA --tag $REGISTRY_IMAGE/web-public:$CI_COMMIT_REF_NAME packages/web-public
+    - docker push $REGISTRY_IMAGE/web-public:$CI_COMMIT_REF_NAME
+    - docker push $REGISTRY_IMAGE/web-public:$CI_COMMIT_SHA
+
+image:server:
+  extends: .image
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build --build-arg NPM_TOKEN=${NPM_TOKEN} --tag $REGISTRY_IMAGE/server:$CI_COMMIT_SHA --tag $REGISTRY_IMAGE/server:$CI_COMMIT_REF_NAME packages/server
+    - docker push $REGISTRY_IMAGE/server:$CI_COMMIT_REF_NAME
+    - docker push $REGISTRY_IMAGE/server:$CI_COMMIT_SHA
+
+deploy:dev:
+  extends: .helm
+  stage: deploy
+  environment:
+    name: develop
+  dependencies:
+  only:
+    - master
+  script:
+    - cd k8/chart
+    - ./upgrade.dev.sh
