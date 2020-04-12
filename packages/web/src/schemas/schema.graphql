@@ -1,5 +1,5 @@
 # source: http://localhost:5000/graphql
-# timestamp: Sun Apr 12 2020 11:42:27 GMT+0200 (South Africa Standard Time)
+# timestamp: Sun Apr 12 2020 13:06:12 GMT+0200 (South Africa Standard Time)
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
@@ -63,6 +63,7 @@ type ProductDetail implements PointInTimeInterface {
   id: ID!
   category: String!
   price: Int!
+  description: String
   name: String!
   createdAt: DateTime!
   updatedAt: DateTime

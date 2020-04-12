@@ -38,6 +38,8 @@ export async function seed(knex: Knex) {
   const product1 = await ProductService.create(context, {
     categoryId: category1.id,
     name: 'RALEIGH - 29" RAZOR FRONT SUSPENSION',
+    description:
+      '29″ Aluminium frame; Raleigh Front Suspension; Shimano 21Speed rear derailleur; Shimano 21 speed twist shifters; Mechanical disc brakes; A headset',
     price: '10',
   });
   await ProductService.updateAvailability(context, {
@@ -54,6 +56,8 @@ export async function seed(knex: Knex) {
   const product2 = await ProductService.create(context, {
     categoryId: category2.id,
     name: 'DELL - E1916HV MONITOR',
+    description:
+      'Dell E1916HV 18.5 Inch LED Monitor Screen performance: View your applications, spreadsheets and more on 18.5 inches of 1366×768 HD clarity, with 16.7 million colors, a color gamut of 85 percenti and a 90° / 65° horizontal / vertical viewing angle. Plug and view: Compatible with both legacy and non-legacy PCs via VGA',
     price: '1900',
   });
   await ProductService.updateAvailability(context, {

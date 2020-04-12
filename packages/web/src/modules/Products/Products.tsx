@@ -4,6 +4,35 @@ import {RelayRenderer} from '../../components/RelayRenderer';
 import {ProductsQuery} from './__generated__/ProductsQuery.graphql';
 import {useParams} from 'react-router';
 import {ProductsQueryResponse} from './__generated__/ProductsQuery.graphql';
+import {makeStyles, Theme, createStyles, Box} from '@material-ui/core';
+import {red} from '@material-ui/core/colors';
+import Product from '../../components/Product';
+import Error from '../../components/Error';
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      maxWidth: 345,
+    },
+    media: {
+      height: 0,
+      paddingTop: '56.25%', // 16:9
+    },
+    expand: {
+      transform: 'rotate(0deg)',
+      marginLeft: 'auto',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+      }),
+    },
+    expandOpen: {
+      transform: 'rotate(180deg)',
+    },
+    avatar: {
+      backgroundColor: red[500],
+    },
+  })
+);
 interface Props {
   data: ProductsQueryResponse;
 }
@@ -16,6 +45,8 @@ const PRODUCT_QUERY = graphql`
           id
           detail {
             name
+            description
+            price
           }
           currentAvailability {
             availability
@@ -26,19 +57,37 @@ const PRODUCT_QUERY = graphql`
   }
 `;
 export const Products = (props: Props) => {
+  const classes = useStyles();
+
   const {data} = props;
   const {node} = data;
   if (node && node.products) {
     const {products} = node;
     return (
-      <>
+      <Box m={2}>
         {products.map((product) => {
-          return <div>{product.detail.name}</div>;
+          return (
+            <Product
+              product={{
+                description: product.detail.description as string,
+                name: product.detail.name,
+                price: product.detail.price,
+                imageUri: 'https://via.placeholder.com/150',
+              }}
+            />
+          );
         })}
-      </>
+      </Box>
     );
   }
-  return <div>Error Resolving Products</div>;
+  return (
+    <Error
+      error={{
+        name: 'Retrieve Products',
+        message: 'Could not resolve Products',
+      }}
+    />
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -12,6 +12,7 @@ export class ProductDetail extends PointInTimeModel<Context> {
   productId!: number;
   price!: string;
   categoryId!: number;
+  description?: string;
   name!: string;
   category!: ProductCategory;
   endpoint?: string;

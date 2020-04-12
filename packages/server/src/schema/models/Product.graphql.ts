@@ -51,6 +51,9 @@ export const ProductDetail = new GraphQLObjectType({
     price: {
       type: GraphQLNonNull(GraphQLInt),
     },
+    description: {
+      type: GraphQLString,
+    },
     name: {
       type: GraphQLNonNull(GraphQLString),
     },

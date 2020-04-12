@@ -9,6 +9,7 @@ import {UserProduct} from '../models/user';
 
 export interface CreateProductOptions {
   categoryId: number;
+  description?: string;
   price: string;
   name: string;
   startDate?: Date;
@@ -85,7 +86,13 @@ export class ProductService {
   }
   public static async create(
     context: Context,
-    {categoryId, name, price, startDate = new Date()}: CreateProductOptions
+    {
+      categoryId,
+      name,
+      price,
+      description,
+      startDate = new Date(),
+    }: CreateProductOptions
   ): Promise<Product> {
     return transaction(Product.knex(), async (trx: Transaction) => {
       const system = await Product.query(trx)
@@ -95,6 +102,7 @@ export class ProductService {
             {
               categoryId,
               price,
+              description,
               name,
               ...addActiveStatusFields(startDate),
             },

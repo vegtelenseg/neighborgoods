@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 6f2ea688470c1a2c38a58a27addebba6 */
+/* @relayHash e9c8af542b3866149bc9eff2c33fc7fe */
 
 import { ConcreteRequest } from "relay-runtime";
 export type ProductAvailabilityEnum = "AVAILABLE" | "SOLD" | "%future added value";
@@ -13,6 +13,8 @@ export type ProductsQueryResponse = {
             readonly id: string;
             readonly detail: {
                 readonly name: string;
+                readonly description: string | null;
+                readonly price: number;
             };
             readonly currentAvailability: {
                 readonly availability: ProductAvailabilityEnum;
@@ -38,6 +40,8 @@ query ProductsQuery(
         id
         detail {
           name
+          description
+          price
           id
         }
         currentAvailability {
@@ -82,6 +86,20 @@ v3 = {
   "storageKey": null
 },
 v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "description",
+  "args": null,
+  "storageKey": null
+},
+v5 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "price",
+  "args": null,
+  "storageKey": null
+},
+v6 = {
   "kind": "ScalarField",
   "alias": null,
   "name": "availability",
@@ -129,7 +147,9 @@ return {
                     "concreteType": "ProductDetail",
                     "plural": false,
                     "selections": [
-                      (v3/*: any*/)
+                      (v3/*: any*/),
+                      (v4/*: any*/),
+                      (v5/*: any*/)
                     ]
                   },
                   {
@@ -141,7 +161,7 @@ return {
                     "concreteType": "ProductAvailability",
                     "plural": false,
                     "selections": [
-                      (v4/*: any*/)
+                      (v6/*: any*/)
                     ]
                   }
                 ]
@@ -198,6 +218,8 @@ return {
                     "plural": false,
                     "selections": [
                       (v3/*: any*/),
+                      (v4/*: any*/),
+                      (v5/*: any*/),
                       (v2/*: any*/)
                     ]
                   },
@@ -210,7 +232,7 @@ return {
                     "concreteType": "ProductAvailability",
                     "plural": false,
                     "selections": [
-                      (v4/*: any*/),
+                      (v6/*: any*/),
                       (v2/*: any*/)
                     ]
                   }
@@ -226,10 +248,10 @@ return {
     "operationKind": "query",
     "name": "ProductsQuery",
     "id": null,
-    "text": "query ProductsQuery(\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ... on ProductCategory {\n      products {\n        id\n        detail {\n          name\n          id\n        }\n        currentAvailability {\n          availability\n          id\n        }\n      }\n    }\n    id\n  }\n}\n",
+    "text": "query ProductsQuery(\n  $id: ID!\n) {\n  node(id: $id) {\n    __typename\n    ... on ProductCategory {\n      products {\n        id\n        detail {\n          name\n          description\n          price\n          id\n        }\n        currentAvailability {\n          availability\n          id\n        }\n      }\n    }\n    id\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
-(node as any).hash = '631ddb6e272d431dc717bcb71a8aa0e5';
+(node as any).hash = '3f02164eca6cc9522394207c62e7ec92';
 export default node;

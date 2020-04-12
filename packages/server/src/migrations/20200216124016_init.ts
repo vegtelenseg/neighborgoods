@@ -105,6 +105,7 @@ export async function up(knex: Knex) {
       .onDelete('CASCADE')
       .notNullable();
     table.string('price').notNullable();
+    table.string('description', 350);
     table
       .integer('category_id')
       .unsigned()
