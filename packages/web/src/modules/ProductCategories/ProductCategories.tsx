@@ -58,17 +58,12 @@ c...]
 const PRODUCT_CATEGORIES_FRAGMENT = graphql`
   fragment ProductCategories_categories on Viewer {
     productsByCategory {
+      id
       name
       imageUri
-      products {
-        id
-        detail {
-          name
-        }
-        currentAvailability {
-          availability
-        }
-      }
+      # products {
+      #   ...Products_products
+      # }
     }
   }
 `;
@@ -95,7 +90,12 @@ export const ProductCategories = (props: Props) => {
           </ListSubheader>
         </GridListTile> */}
               {categories.productsByCategory.map((category) => (
-                <GridListTile key={category.name}>
+                <GridListTile
+                  key={category.name}
+                  onClick={() =>
+                    (window.location.href = `/products/${category.id}`)
+                  }
+                >
                   <img
                     src={require(`../../assets/categories/${category.imageUri}`)}
                     alt={category.imageUri}

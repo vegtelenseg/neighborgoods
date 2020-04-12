@@ -1,22 +1,41 @@
-import {nodeDefinitions} from 'graphql-relay';
+import {nodeDefinitions, fromGlobalId} from 'graphql-relay';
+import Context from '../context';
+import {ProductService} from '../services/ProductService';
 
 // import {User} from '../models';
 
-const {nodeField, nodeInterface} = nodeDefinitions<{user: any}>(
-  // resolve the ID to an object
-  (_globalId, context) => {
-    // parse the globalID
-    // const {type, id} = fromGlobalId(globalId);
+const typeSymbol = Symbol('type');
 
-    if (!context.user) {
-      // Only return data for authenticated users
-      return null;
+async function retrieveById(context: Context, type: string, id: number) {
+  switch (type) {
+    case 'ProductCategory': {
+      const productsCategory = await ProductService.fetchProductsByCategoryId(
+        context,
+        id
+      );
+      console.log('PRODUCTS: ', productsCategory);
+      return productsCategory;
     }
+    default:
+      console.log('PRODUC: ');
+      break;
+  }
+  return null;
+}
 
-    throw new Error('Not Implemented');
+const {nodeField, nodeInterface} = nodeDefinitions<Context>(
+  async (globalId, context) => {
+    const {type, id} = fromGlobalId(globalId);
+    const result = await retrieveById(context, type, Number(id));
+
+    if (result) {
+      // @ts-ignore
+      result[typeSymbol] = type;
+      return result;
+    }
+    return null;
   },
-  // determines the type. Join Monster places that type onto the result object on the "__type__" property
-  (obj) => obj.__type__
+  (obj) => obj[typeSymbol]
 );
 
 export {nodeInterface, nodeField};

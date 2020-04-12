@@ -3,20 +3,11 @@
 
 import { ReaderFragment } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
-export type ProductAvailabilityEnum = "AVAILABLE" | "SOLD" | "%future added value";
 export type ProductCategories_categories = {
     readonly productsByCategory: ReadonlyArray<{
+        readonly id: string;
         readonly name: string;
         readonly imageUri: string;
-        readonly products: ReadonlyArray<{
-            readonly id: string;
-            readonly detail: {
-                readonly name: string;
-            };
-            readonly currentAvailability: {
-                readonly availability: ProductAvailabilityEnum;
-            };
-        }>;
     }>;
     readonly " $refType": "ProductCategories_categories";
 };
@@ -28,15 +19,7 @@ export type ProductCategories_categories$key = {
 
 
 
-const node: ReaderFragment = (function(){
-var v0 = {
-  "kind": "ScalarField",
-  "alias": null,
-  "name": "name",
-  "args": null,
-  "storageKey": null
-};
-return {
+const node: ReaderFragment = {
   "kind": "Fragment",
   "name": "ProductCategories_categories",
   "type": "Viewer",
@@ -52,66 +35,30 @@ return {
       "concreteType": "ProductCategory",
       "plural": true,
       "selections": [
-        (v0/*: any*/),
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "id",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "name",
+          "args": null,
+          "storageKey": null
+        },
         {
           "kind": "ScalarField",
           "alias": null,
           "name": "imageUri",
           "args": null,
           "storageKey": null
-        },
-        {
-          "kind": "LinkedField",
-          "alias": null,
-          "name": "products",
-          "storageKey": null,
-          "args": null,
-          "concreteType": "Product",
-          "plural": true,
-          "selections": [
-            {
-              "kind": "ScalarField",
-              "alias": null,
-              "name": "id",
-              "args": null,
-              "storageKey": null
-            },
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "name": "detail",
-              "storageKey": null,
-              "args": null,
-              "concreteType": "ProductDetail",
-              "plural": false,
-              "selections": [
-                (v0/*: any*/)
-              ]
-            },
-            {
-              "kind": "LinkedField",
-              "alias": null,
-              "name": "currentAvailability",
-              "storageKey": null,
-              "args": null,
-              "concreteType": "ProductAvailability",
-              "plural": false,
-              "selections": [
-                {
-                  "kind": "ScalarField",
-                  "alias": null,
-                  "name": "availability",
-                  "args": null,
-                  "storageKey": null
-                }
-              ]
-            }
-          ]
         }
       ]
     }
   ]
 };
-})();
-(node as any).hash = '20f2348110e869f8cd7bae08b1c4745c';
+(node as any).hash = '4e1fdaaaa1add9ecdb77b1bc9bc8e100';
 export default node;

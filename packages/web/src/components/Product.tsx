@@ -41,6 +41,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+interface Product {
+  name: string;
+  price: number;
+}
+
+interface Props {
+  productInformation: Product;
+}
 export default function Product() {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);

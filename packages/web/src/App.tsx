@@ -16,7 +16,7 @@ import AuthContextProvider, {
 import {Environment} from 'react-relay';
 import _ from 'lodash';
 import Menu from './modules/Menu/Menu';
-import {Products} from './modules/Products/Products';
+import Products from './modules/Products/Products';
 
 const App = () => {
   const {auth, handleLogout} = useAuthContextProvider();
@@ -31,12 +31,12 @@ const App = () => {
         if (auth.authenticated) {
           return {
             accessToken: auth.token,
-            refreshToken: auth.refreshToken
+            refreshToken: auth.refreshToken,
           };
         } else {
           return {
             accessToken: '',
-            refreshToken: ''
+            refreshToken: '',
           };
         }
       }
@@ -72,7 +72,7 @@ const App = () => {
           <Route path="/profile">
             <Profile />
           </Route>
-          <Route path="/products">
+          <Route path="/products/:id">
             <Products />
           </Route>
         </Switch>

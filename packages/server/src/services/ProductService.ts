@@ -23,13 +23,35 @@ interface UpdateAvailabilityOptions {
 const PRODUCTS_EAGER = '[availability, detail(active)]';
 
 export class ProductService {
+  public static async fetchProductsByCategoryId(
+    context: Context,
+    categoryId: number
+  ) {
+    const categoryProductsById = ProductCategory.query()
+      .context(context)
+      .joinEager(
+        '[products.[detail(active).[category], statuses(active), availability(active)]]'
+      )
+
+      //make sure we only return active systems
+      .whereExists(
+        ProductStatus.query()
+          .whereColumn('products.id', 'productStatus.productId')
+          .andWhere({state: PointInTimeState.active})
+      )
+      .andWhere({
+        'product_category.id': categoryId,
+      })
+      .findOne(true);
+    return categoryProductsById;
+  }
   public static async fetchProductsByCategory(
     context: Context,
     //linkedToUser provides information whether the user wants systems that are, or aren't linked to them
     //if not provided, will return all systems
     linkedToUser?: boolean
   ) {
-    const categorySystems = ProductCategory.query()
+    const categoryProducts = ProductCategory.query()
       .context(context)
       .joinEager(
         '[products.[detail(active).[category], statuses(active), availability(active)]]'
@@ -49,17 +71,17 @@ export class ProductService {
       }
 
       const filterQuery = UserProduct.query()
-        .whereColumn('product.id', 'userSystem.productId')
+        .whereColumn('product.id', 'userProduct.productId')
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .andWhere({userId: context.user!.id, state: PointInTimeState.active});
 
       if (linkedToUser) {
-        categorySystems.whereExists(filterQuery);
+        categoryProducts.whereExists(filterQuery);
       } else {
-        categorySystems.whereNotExists(filterQuery);
+        categoryProducts.whereNotExists(filterQuery);
       }
     }
-    return await categorySystems;
+    return await categoryProducts;
   }
   public static async create(
     context: Context,

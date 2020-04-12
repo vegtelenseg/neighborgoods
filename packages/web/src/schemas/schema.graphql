@@ -1,5 +1,5 @@
 # source: http://localhost:5000/graphql
-# timestamp: Thu Mar 05 2020 00:55:25 GMT+0200 (South Africa Standard Time)
+# timestamp: Sun Apr 12 2020 11:42:27 GMT+0200 (South Africa Standard Time)
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
@@ -50,7 +50,7 @@ enum ProductAvailabilityEnum {
   AVAILABLE
 }
 
-type ProductCategory {
+type ProductCategory implements Node {
   """The ID of an object"""
   id: ID!
   name: String!

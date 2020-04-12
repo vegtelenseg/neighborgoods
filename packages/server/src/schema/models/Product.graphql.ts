@@ -9,6 +9,7 @@ import {
 } from 'graphql';
 import {globalIdField} from 'graphql-relay';
 import {PointInTimeInterface, pointInTimeFields} from './Audit.graphql';
+import {nodeInterface} from '../Relay';
 
 export const ProductAvailabilityEnum = new GraphQLEnumType({
   name: 'ProductAvailabilityEnum',
@@ -72,6 +73,7 @@ export const ProductAvailability = new GraphQLObjectType({
 
 export const ProductCategory = new GraphQLObjectType({
   name: 'ProductCategory',
+  interfaces: [nodeInterface],
   fields: () => ({
     id: globalIdField('ProductCategory'),
     name: {type: GraphQLNonNull(GraphQLString)},
