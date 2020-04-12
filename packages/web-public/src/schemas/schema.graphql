@@ -1,5 +1,5 @@
 # source: http://localhost:5000/graphql
-# timestamp: Sun Apr 12 2020 13:06:12 GMT+0200 (South Africa Standard Time)
+# timestamp: Sun Apr 12 2020 17:57:42 GMT+0200 (South Africa Standard Time)
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
@@ -79,12 +79,29 @@ type Query {
   viewer: Viewer!
 }
 
+type Subscription {
+  onNewUserMessage: UserNotificationUpdate!
+}
+
 type User {
   """The ID of an object"""
   id: ID!
   username: String!
   profile: UserProfile
   userProducts: [UserProduct]
+}
+
+type UserMessage implements Node {
+  """The ID of an object"""
+  id: ID!
+  message: String!
+  read: Boolean!
+  deleted: Boolean!
+  createdAt: DateTime!
+}
+
+type UserNotificationUpdate {
+  message: UserMessage!
 }
 
 type UserProduct {

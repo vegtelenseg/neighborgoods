@@ -1,4 +1,5 @@
 import {User} from './user';
-import {Product} from './product';
+import {UserMessage} from './message';
+import {Product, ProductAvailability} from './product';
 
-export {User, Product};
+export {User, Product, ProductAvailability, UserMessage};

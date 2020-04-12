@@ -8,22 +8,16 @@ import {ConnectionHandler} from 'relay-runtime';
 
 const subscription = graphql`
   subscription NotificationSubscription_OnNewUserNotificationSubscription {
-    onNewUserNotification {
-      notification {
+    onNewUserMessage {
+      message {
         id
-        title
         message
         read
-        category
         createdAt
-        markedCritical
-        linkType
-        linkId
-        linkUri
       }
-      notificationsCount {
-        unread
-      }
+      # messagesCount {
+      #   unread
+      # }
     }
   }
 `;
@@ -50,17 +44,18 @@ export function NotificationSubscription() {
           );
 
           const rootField = store.getRootField('onNewUserNotification');
-          const notification = rootField.getLinkedRecord('notification');
+          if (rootField) {
+            const message = rootField.getLinkedRecord('message');
+            if (viewerNotifications && message) {
+              const edge = ConnectionHandler.createEdge(
+                store,
+                viewerNotifications,
+                message,
+                'ViewerNotificationsEdge'
+              );
 
-          if (viewerNotifications) {
-            const edge = ConnectionHandler.createEdge(
-              store,
-              viewerNotifications,
-              notification,
-              'ViewerNotificationsEdge'
-            );
-
-            ConnectionHandler.insertEdgeBefore(viewerNotifications, edge);
+              ConnectionHandler.insertEdgeBefore(viewerNotifications, edge);
+            }
           }
         }
       },

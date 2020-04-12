@@ -1,6 +1,6 @@
 web-public:
   image:
-    repository: registry.gitlab.com/stackworx.io/angloamerican/self-service-portal/web-public
+    repository: registry.gitlab.com/think/neighborgoods/web-public
     tag: master
     pullPolicy: IfNotPresent
   imageCredentials:
@@ -8,14 +8,14 @@ web-public:
   ingress:
     enabled: true
     hosts:
-      - selfservice.angloamerican.stackworx.dev
+      - neighborgoods.think.dev
     annotations:
       kubernetes.io/ingress.class: traefik
       traefik.ingress.kubernetes.io/redirect-entry-point: https
       # Traefik 2 options
       traefik.ingress.kubernetes.io/router.entrypoints: http,https
   env:
-    APP_SERVER_URI: "https://api.selfservice.angloamerican.stackworx.dev"
+    APP_SERVER_URI: "https://api.neighborgoods.think.dev"
     APP_STAGE: "development"
     # APP_DIRECTLINE_TOKEN_ENDPOINT: "https://bot.angloamerican.stackworx.dev/token-generate"
     # APP_DIRECTLINE_ENDPOINT: "https://directline.angloamerican.stackworx.dev/v3/directline"
@@ -35,7 +35,7 @@ web-public:
 
 web-server:
   image:
-    repository: registry.gitlab.com/stackworx.io/angloamerican/self-service-portal/server
+    repository: registry.gitlab.com/think/neighborgoods/server
     tag: master
     pullPolicy: IfNotPresent
   imageCredentials:
@@ -43,7 +43,7 @@ web-server:
   ingress:
     enabled: true
     hosts:
-      - api.selfservice.angloamerican.stackworx.dev
+      - api.neighborgoods.think.dev
     annotations:
       kubernetes.io/ingress.class: traefik
       # Only listen on https
@@ -58,10 +58,10 @@ web-server:
     command:
   env:
     APP_STAGE: "development"
-    MSSQL_HOST: "anglo-self-service-mssql"
-    MSSQL_DATABASE: "master"
-    MSSQL_PASSWORD: "Strong_!_Password"
-    REDIS_HOST: "anglo-self-service-redis-master"
+    POSTGRES_HOST: "neighborgoods-mssql"
+    POSTGRES_DATABASE: "postgres"
+    POSTGRES_PASSWORD: "password"
+    REDIS_HOST: "neighborgoods-redis-master"
     PORT: "80"
     DEBUG_PORT: "8080"
   secrets:
@@ -73,14 +73,14 @@ web-server:
       ref:
         name: azure-app-registration
         key: client-secret
-    - name: AZURE_TENANT_ID
-      ref:
-        name: azure-app-registration
-        key: tenant-id
-    - name: AZURE_BOT_SECRET
-      ref:
-        name: azure-bot
-        key: secret
+    # - name: AZURE_TENANT_ID
+    #   ref:
+    #     name: azure-app-registration
+    #     key: tenant-id
+    # - name: AZURE_BOT_SECRET
+    #   ref:
+    #     name: azure-bot
+    #     key: secret
   probes:
     enabled: true
     liveness:
@@ -92,17 +92,17 @@ web-server:
   nodeSelector:
     type: apps
 
-mssql:
+postgres:
   enabled: true
   acceptEula:
     value: "y"
   # Override sapassword in templates/secret.yaml
-  sapassword: "Strong_!_Password"
+  # sapassword: "Strong_!_Password"
   # existingSecret: ""
   # existingSecretKey: sapassword
   image:
-    repository: microsoft/mssql-server-linux
-    tag: 2017-CU5
+    repository: postgres
+    tag: latest
     pullPolicy: IfNotPresent
 
   persistence:
