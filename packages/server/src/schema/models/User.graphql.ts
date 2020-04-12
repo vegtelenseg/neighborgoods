@@ -8,23 +8,6 @@ import {
 import {globalIdField} from 'graphql-relay';
 import {Product} from './Product.graphql';
 
-export const User = new GraphQLObjectType({
-  name: 'User',
-  fields: () => ({
-    id: globalIdField('User'),
-    username: {
-      type: GraphQLNonNull(GraphQLString),
-    },
-    profile: {
-      type: UserProfile,
-      resolve: async (parent) => parent.activeProfile,
-    },
-    userProducts: {
-      type: new GraphQLList(UserProduct),
-    },
-  }),
-});
-
 export const UserProduct = new GraphQLObjectType({
   name: 'UserProduct',
   fields: () => ({
@@ -50,6 +33,23 @@ export const UserProfile = new GraphQLObjectType({
     },
     cellphone: {
       type: GraphQLString,
+    },
+  }),
+});
+
+export const User = new GraphQLObjectType({
+  name: 'User',
+  fields: () => ({
+    id: globalIdField('User'),
+    username: {
+      type: GraphQLNonNull(GraphQLString),
+    },
+    profile: {
+      type: UserProfile,
+      resolve: async (parent) => parent.activeProfile,
+    },
+    userProducts: {
+      type: new GraphQLList(UserProduct),
     },
   }),
 });

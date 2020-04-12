@@ -1,6 +1,6 @@
 import {Request} from 'express';
 import {SpanOptions} from 'opentracing';
-import Context from './Context';
+import Context from './context';
 import tracer from './tracer';
 
 export const startSpan = (name: string, options?: SpanOptions) =>
@@ -16,6 +16,7 @@ export function createContext(req: Request): Context {
 
   return {
     span,
+    // eslint-disable-next-line
     // @ts-ignore
     user: req.user,
     req,

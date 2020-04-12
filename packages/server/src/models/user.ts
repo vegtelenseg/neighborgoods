@@ -43,6 +43,7 @@ export class UserProfile extends PointInTimeModel<Context> {
   public profileName!: string;
   public cellphoneNumber!: string;
 }
+
 export class User extends AggregateRoot<Context> {
   public readonly id!: number;
   public username!: string;

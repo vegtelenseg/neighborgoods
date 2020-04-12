@@ -18,8 +18,8 @@ stages:
   image: docker:latest
   variables:
     DOCKER_DRIVER: overlay2
-  # cache:
-  #   policy: pull
+  cache:
+    policy: pull
   services:
     - docker:dind
   only:
@@ -36,11 +36,11 @@ build:
   stage: build
   tags:
     - docker
-  # cache:
-  #   paths:
-  #     - packages/web-public/node_modules/
-  #     - packages/server/node_modules/
-  # - packages/e2e/node_modules/
+  cache:
+    paths:
+      - packages/web-public/node_modules/
+      - packages/server/node_modules/
+      # - packages/e2e/node_modules/
   artifacts:
     paths:
       - packages/server/node_modules/

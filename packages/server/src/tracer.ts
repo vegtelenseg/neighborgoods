@@ -1,4 +1,3 @@
-// @ts-ignore
 import {initTracer} from 'jaeger-client';
 import {Tracer} from 'opentracing';
 

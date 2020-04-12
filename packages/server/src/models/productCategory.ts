@@ -1,6 +1,6 @@
 import {Model} from 'objection';
 import {BaseModel} from './base';
-import Context from '../Context';
+import Context from '../context';
 import {Product} from './product';
 
 export class ProductCategory extends BaseModel<Context> {

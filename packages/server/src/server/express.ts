@@ -1,18 +1,18 @@
 import jwt from 'jsonwebtoken';
-import {NextFunction, Response} from 'express';
+import express, {NextFunction, Response} from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
 import helmet from 'helmet';
 import io from 'socket.io';
 import http from 'http';
+import bodyParser from 'body-parser';
 import schema from '../schema';
 import tracer from '../tracer';
 import {createContext} from '../util';
 import {UserService} from '../services/UserService';
 import {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} from './constants';
-const bodyParser = require('body-parser');
-const express = require('express');
+
 const app = express();
 
 app.use(bodyParser());

@@ -31,26 +31,6 @@ export class ProductDetail extends PointInTimeModel<Context> {
   }
 }
 
-export class ProductAvailability extends PointInTimeModel<Context> {
-  public productId!: number;
-  public sold!: ProductAvailabilityType;
-  public message!: string;
-  public product!: Partial<Product>;
-
-  public static relationMappings() {
-    return {
-      product: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Product,
-        join: {
-          from: 'productAvailability.productId',
-          to: 'product.id',
-        },
-      },
-    };
-  }
-}
-
 export class Product extends AggregateRoot<Context> {
   public detail!: Partial<ProductDetail>[];
   public statuses!: Partial<ProductStatus>[];
@@ -88,6 +68,26 @@ export class Product extends AggregateRoot<Context> {
         join: {
           from: 'product.id',
           to: 'productStatus.productId',
+        },
+      },
+    };
+  }
+}
+
+export class ProductAvailability extends PointInTimeModel<Context> {
+  public productId!: number;
+  public sold!: ProductAvailabilityType;
+  public message!: string;
+  public product!: Partial<Product>;
+
+  public static relationMappings() {
+    return {
+      product: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Product,
+        join: {
+          from: 'productAvailability.productId',
+          to: 'product.id',
         },
       },
     };
