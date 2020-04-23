@@ -1,9 +1,7 @@
 import React from 'react';
 import {Theme, createStyles, makeStyles} from '@material-ui/core/styles';
-import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 
@@ -30,7 +28,7 @@ export const ProductCategory = (props: Props) => {
   const {productCategory} = props;
   return (
     <GridListTile>
-      <img src={productCategory.imageUri} />
+      <img src={productCategory.imageUri} alt="images" />
       <GridListTileBar
         title={productCategory.name}
         subtitle={<span>{productCategory.subTitle}</span>}

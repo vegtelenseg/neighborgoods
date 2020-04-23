@@ -86,7 +86,7 @@ image:web-public:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker build --tag $REGISTRY_IMAGE/web-public:$CI_COMMIT_SHA --tag $REGISTRY_IMAGE/web-public:$CI_COMMIT_REF_NAME packages/web-public
     - docker push $REGISTRY_IMAGE/web-public:$CI_COMMIT_REF_NAME
-    - docker push $REGISTRY_IMAGE/web-public:$CI_COMMIT_SHA
+    - docker push $REGISTRY_IMAGE/web-public:$CI_COMMIT_SHmAk
 
 image:server:
   extends: .image

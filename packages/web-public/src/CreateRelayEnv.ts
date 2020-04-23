@@ -1,4 +1,3 @@
-/* tslint:disable no-any */
 import {
   RelayNetworkLayer,
   urlMiddleware,
@@ -11,8 +10,8 @@ import {
   //CacheConfig,
   //ConcreteBatch,
   SubscribeFunction,
-  ConcreteBatch,
-  Variables,
+  // ConcreteBatch,
+  // Variables,
   cacheMiddleware,
   // ConcreteBatch,
 } from 'react-relay-network-modern/es'; // Changed to /lib to avoid mjs issue that fails the build
@@ -21,8 +20,8 @@ import {
   RecordSource,
   Store,
   INetwork,
-  CacheConfig,
-  Observable,
+  // CacheConfig,
+  // Observable,
   //Observable,
   // Variables,
   // CacheConfig,
@@ -39,7 +38,7 @@ type HandleLogoutFn = () => void;
 type GetAuthTokens = () => {accessToken: string; refreshToken: string};
 
 function createNetworkLayer(
-  handleLogout: HandleLogoutFn,
+  _handleLogout: HandleLogoutFn,
   getAuthTokens: GetAuthTokens,
   subscribeFn: SubscribeFunction
 ): INetwork {
@@ -151,7 +150,7 @@ export default function createEnv(
 ) {
   const handlerProvider = undefined;
 
-  const client = new SubscriptionClient(
+  new SubscriptionClient(
     // TODO: remove hack
     `${serverUri}/graphql`.replace('http', 'ws'),
     {
@@ -165,41 +164,42 @@ export default function createEnv(
     }
   );
 
-  const subscribeFn = (
-    config: ConcreteBatch,
-    variables: Variables,
-    _cacheConfig: CacheConfig
-  ) => {
-    return Observable.create((sink) => {
-      const result = client
-        .request({
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-          // @ts-ignore
-          query: config.text,
-          operationName: config.name,
-          variables,
-        })
-        // New line for ts-ignore
-        .subscribe({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          next(v: any) {
-            sink.next(v);
-          },
-          complete() {
-            sink.complete();
-          },
-          error(error: Error) {
-            sink.error(error);
-          },
-        });
+  // const subscribeFn = (
+  //   config: ConcreteBatch,
+  //   variables: Variables,
+  //   _cacheConfig: CacheConfig
+  // ) => {
+  //   return Observable.create((sink) => {
+  //     const result = client
+  //       .request({
+  //         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  //         // @ts-ignore
+  //         query: config.text,
+  //         operationName: config.name,
+  //         variables,
+  //       })
+  //       // New line for ts-ignore
+  //       .subscribe({
+  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //         next(v: any) {
+  //           sink.next(v);
+  //         },
+  //         complete() {
+  //           sink.complete();
+  //         },
+  //         error(error: Error) {
+  //           sink.error(error);
+  //         },
+  //       });
 
-      return () => result.unsubscribe();
-    });
-  };
+  //     return () => result.unsubscribe();
+  //   });
+  // };
 
   const network = createNetworkLayer(
     handleLogout,
     getAuthTokens,
+    // eslint-disable-next-line
     // @ts-ignore
     null
   );

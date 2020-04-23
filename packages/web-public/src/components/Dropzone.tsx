@@ -3,7 +3,9 @@ import {DropzoneArea} from 'material-ui-dropzone';
 
 interface Props {
   onChange: (files: string[]) => void;
+  // eslint-disable-next-line
   onDrop: (fieldName: string, value: any) => void;
+  // eslint-disable-next-line
   currentImages: any;
 }
 

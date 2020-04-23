@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {AuthContext} from '../../contexts/AuthContext';
-import {theme} from '../../Theme';
 import {CircularProgress} from '@material-ui/core';
 
 function Logout() {

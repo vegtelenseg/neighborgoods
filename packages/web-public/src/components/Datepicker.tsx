@@ -18,6 +18,7 @@ interface Props {
   name: string;
 }
 export const Datepicker = (props: Props) => {
+  // eslint-disable-next-line
   const [date, setDate] = React.useState(null as any);
   const classes = useStyles();
   const timeNow = moment();

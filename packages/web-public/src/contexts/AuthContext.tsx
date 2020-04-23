@@ -124,7 +124,7 @@ export function AuthContextProvider({children}: Props) {
         setLogoutMessage('You have been logged out');
       }
     },
-    [authContext.authenticated]
+    [authContext.authenticated, authContext.refreshToken]
   );
 
   useEffect(() => {

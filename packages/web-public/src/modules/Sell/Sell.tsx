@@ -74,6 +74,7 @@ const Schema = Yup.object().shape({
 
 export const Sell = () => {
   const classes = useStyles();
+  // eslint-disable-next-line
   const [images, setSelectedImages] = React.useState([] as any);
   const handleImageSelect = (images: string[]) => {
     setSelectedImages(images);

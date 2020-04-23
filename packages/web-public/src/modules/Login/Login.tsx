@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {Link as RouterLink, withRouter, useHistory} from 'react-router-dom';
 import {Form, Formik} from 'formik';
 import PropTypes from 'prop-types';
@@ -121,7 +121,8 @@ const Schema = Yup.object().shape({
   password: Yup.string().required('Sorry, this field is required'),
 });
 
-const SignIn = (props: any) => {
+// eslint-disable-next-line
+const SignIn = (_props: any) => {
   const history = useHistory();
   const {handleLogin} = React.useContext(AuthContext);
 
@@ -145,8 +146,8 @@ const SignIn = (props: any) => {
           <div className={classes.quote}>
             <div className={classes.quoteInner}>
               <Typography className={classes.quoteText} variant="h1">
-                Hella narwhal Cosby sweater McSweeney's, salvia kitsch before
-                they sold out High Life.
+                Hella narwhal Cosby sweater McSweeney&apos;s, salvia kitsch
+                before they sold out High Life.
               </Typography>
               <div>
                 <Typography className={classes.name} variant="body1">
@@ -273,7 +274,7 @@ const SignIn = (props: any) => {
                       Sign in now
                     </Button>
                     <Typography color="textSecondary" variant="body1">
-                      Don't have an account?{' '}
+                      Don&apos;t have an account?
                       <Link component={RouterLink} to="/sign-up" variant="h6">
                         Sign up
                       </Link>
