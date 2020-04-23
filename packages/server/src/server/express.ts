@@ -1,11 +1,9 @@
 import jwt from 'jsonwebtoken';
-import express, {NextFunction, Response} from 'express';
+import express, {Response} from 'express';
 import {ApolloServer} from 'apollo-server-express';
 import OpentracingExtension from 'apollo-opentracing';
 import cors from 'cors';
 import helmet from 'helmet';
-import io from 'socket.io';
-import http from 'http';
 import bodyParser from 'body-parser';
 import schema from '../schema';
 import tracer from '../tracer';
@@ -18,41 +16,10 @@ const app = express();
 app.use(bodyParser());
 app.use(cors());
 app.use(helmet());
-const server = http.createServer(app);
 
-// @ts-ignore
-const authenticateJWT = async (req: any, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-
-    // TODO:  First check if refreshtoken is valid.
-    // If valid then continue with code below, otherwise
-    // Send them login page.
-    jwt.verify(token, ACCESS_TOKEN_SECRET, (err: any, user: any) => {
-      if (err) {
-        return res.json({
-          message: 'Sorry. You are not logged in. ' + err.message,
-        });
-      }
-      // @ts-ignore
-      req.user = {
-        username: user.username,
-        id: user.id,
-      };
-      return next();
-    });
-  }
-};
-
-const socket = io(server);
-socket.on('connection', function(socket) {
-  console.log('a user connected: ', socket.id);
-});
-
-// app.use('/graphql', authenticateJWT)
-const decodeCreds = (token: string) => {
-  const encodedredentials = token.split(' ')[1];
+const decodeCreds = (req: any) => {
+  const authHeader = req.headers.authorization!;
+  const encodedredentials = authHeader.split(' ')[1];
   const decodedCredentials = Buffer.from(
     encodedredentials,
     'base64'
@@ -61,8 +28,7 @@ const decodeCreds = (token: string) => {
 };
 
 app.post('/login', async (req: any, res: Response) => {
-  const authHeader = req.headers.authorization!;
-  const decodedCredentials = decodeCreds(authHeader);
+  const decodedCredentials = decodeCreds(req);
   const [username, password] = decodedCredentials.split(':');
   const context = createContext(req);
   const credentials = {
@@ -75,11 +41,9 @@ app.post('/login', async (req: any, res: Response) => {
   );
   if (user) {
     // TODO: Store these in .env;
-    const accessTokenSecret = ACCESS_TOKEN_SECRET;
-    const refreshTokenSecret = REFRESH_TOKEN_SECRET;
     const accessToken = jwt.sign(
       {username: user.username, id: user.id},
-      accessTokenSecret,
+      ACCESS_TOKEN_SECRET,
       {
         expiresIn: '1d',
       }
@@ -87,7 +51,7 @@ app.post('/login', async (req: any, res: Response) => {
     const refreshTokenCount = user.resetCount + 1;
     const refreshToken = jwt.sign(
       {username: user.username, id: user.id, count: refreshTokenCount},
-      refreshTokenSecret,
+      REFRESH_TOKEN_SECRET,
       {
         expiresIn: '7d',
       }
@@ -103,59 +67,57 @@ app.post('/login', async (req: any, res: Response) => {
   }
 });
 
-app.post('/refreshToken', async (req: any, res: any, next: NextFunction) => {
-  if (req.body && req.body.refreshToken) {
-    const {refreshToken} = req.body;
-
-    if (!refreshToken) {
-      next();
-    }
-
+app.post('/refreshToken', async (req, res) => {
+  // @ts-ignore
+  const authHeader = req.headers['authorization'];
+  if (authHeader) {
+    const [, token] = authHeader.split(' ');
     try {
-      const decoded = jwt.decode(refreshToken) as {
-        [key: string]: any;
-      };
-      if (decoded) {
-        req.user = {
-          // @ts-ignore
-          id: decoded['id'],
-          // @ts-ignore
-          username: decoded['username'],
-        };
-      }
-      jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
-      const context = createContext(req);
-      const user = await UserService.findByUsername(
-        context,
-        decoded['username']
+      const decode = jwt.verify(token, REFRESH_TOKEN_SECRET) as any;
+      const newAccessToken = jwt.sign(
+        {id: decode.id, username: decode.username},
+        ACCESS_TOKEN_SECRET
+      );
+      const newRefreshToken = jwt.sign(
+        {
+          id: decode.id,
+          username: decode.username,
+          count: decode.count + 1,
+        },
+        REFRESH_TOKEN_SECRET
       );
       // @ts-ignore
-      if (user && user.resetCount === decoded.count) {
-        const newAccessToken = jwt.sign(
-          {id: user.id, username: user.username},
-          ACCESS_TOKEN_SECRET
-        );
-        const newRefreshToken = jwt.sign(
-          {id: user.id, username: user.username, count: user.resetCount + 1},
-          REFRESH_TOKEN_SECRET
-        );
-        res.send({
-          accessToken: newAccessToken,
-          refreshToken: newRefreshToken,
-        });
-      }
+      req.user = {
+        id: decode.id,
+        username: decode.username,
+      };
+      const context = createContext(req);
+      await UserService.updateResetCount(context, decode.count + 1);
+      res.send({
+        newAccessToken,
+        newRefreshToken,
+      });
     } catch (error) {
-      res.status(401);
-      next();
-      console.log('Token not good: ', error.message);
+      res.redirect(401, '/login');
+      console.log('Error Refreshing Token BE: ', error.message);
     }
   }
 });
 const apolloServer = new ApolloServer({
   schema,
   subscriptions: {},
-  context: async ({req, res}: {req: any; res: Response}) => {
-    if (req.headers.authorization) {
+  context: async ({
+    req,
+    res,
+    connection,
+  }: {
+    req: any;
+    res: Response;
+    connection: any;
+  }) => {
+    if (connection) {
+      return connection.context;
+    } else if (req.headers.authorization) {
       const authHeader = req.headers.authorization;
       const [, token] = authHeader.split(' ');
 
@@ -164,23 +126,48 @@ const apolloServer = new ApolloServer({
       }
 
       try {
-        const decoded = jwt.decode(token);
-        if (decoded) {
-          req.user = {
-            // @ts-ignore
-            id: decoded.id,
-            // @ts-ignore
-            username: decoded.username,
-          };
-        }
-        jwt.verify(token, ACCESS_TOKEN_SECRET);
-        socket.emit('message', {
-          message: 'Yea',
-        });
+        const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
+        req.user = {
+          ...(decoded as object),
+        };
+        return createContext(req);
       } catch (error) {
-        res.status(401);
-
         console.log('Token not good: ', error.message);
+        // @ts-ignore
+        const authHeader = req.headers['authorization'];
+        if (authHeader) {
+          const [, token] = authHeader.split(' ');
+          try {
+            const decode = jwt.verify(token, REFRESH_TOKEN_SECRET) as any;
+            const newAccessToken = jwt.sign(
+              {id: decode.id, username: decode.username},
+              ACCESS_TOKEN_SECRET
+            );
+            const newRefreshToken = jwt.sign(
+              {
+                id: decode.id,
+                username: decode.username,
+                count: decode.count + 1,
+              },
+              REFRESH_TOKEN_SECRET
+            );
+            // @ts-ignore
+            req.user = {
+              id: decode.id,
+              username: decode.username,
+            };
+            const context = createContext(req);
+            await UserService.updateResetCount(context, decode.count + 1);
+            res.send({
+              newAccessToken,
+              newRefreshToken,
+            });
+          } catch (error) {
+            res.redirect(401, '/login');
+            console.log('Error Refreshing Token BE: ', error.message);
+          }
+        }
+        return res.status(401);
       }
     } else {
       req.user = {};
@@ -207,6 +194,7 @@ const apolloServer = new ApolloServer({
 });
 apolloServer.applyMiddleware({app, path: '/graphql', bodyParserConfig: true});
 const port = 5000;
-server.listen(port, () =>
+const httpServer = app.listen(port, () =>
   console.log(`🚀 Server ready at http://localhost:${port}/graphql`)
 );
+apolloServer.installSubscriptionHandlers(httpServer);

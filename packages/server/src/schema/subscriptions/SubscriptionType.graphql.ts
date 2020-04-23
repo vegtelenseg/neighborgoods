@@ -6,6 +6,7 @@ import SubscriptionService, {
 import Context from '../../context';
 import {UserMessage} from '../models/UserMessage.graphql';
 import UserMessageService from '../../services/UserMessageService';
+import {ViewerMessagesType} from '../models/Viewer.graphql';
 
 function subscribe(event: SubscriptionEvent) {
   return (
@@ -21,14 +22,14 @@ function subscribe(event: SubscriptionEvent) {
 }
 
 const UserMessageUpdate = new GraphQLObjectType({
-  name: 'UserNotificationUpdate',
+  name: 'UserMessageUpdate',
   fields: () => ({
     message: {
       type: GraphQLNonNull(UserMessage),
     },
-    // notificationsCount: {
-    //   type: GraphQLNonNull(ViewerNotificationsType),
-    // },
+    messagesCount: {
+      type: GraphQLNonNull(ViewerMessagesType),
+    },
   }),
 });
 
@@ -51,8 +52,8 @@ export default new GraphQLObjectType({
         );
 
         return {
-          notification: parent.message,
-          notificationsCount: {
+          message: parent.message,
+          messagesCount: {
             id: parent.userId,
             unread,
           },

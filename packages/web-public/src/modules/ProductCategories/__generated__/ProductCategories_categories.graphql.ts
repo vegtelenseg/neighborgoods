@@ -8,7 +8,7 @@ export type ProductCategories_categories = {
         readonly id: string;
         readonly name: string;
         readonly imageUri: string;
-    }>;
+    }> | null;
     readonly " $refType": "ProductCategories_categories";
 };
 export type ProductCategories_categories$data = ProductCategories_categories;

@@ -1,5 +1,5 @@
 # source: http://localhost:5000/graphql
-# timestamp: Sun Apr 12 2020 17:57:42 GMT+0200 (South Africa Standard Time)
+# timestamp: Mon Apr 13 2020 13:56:28 GMT+0200 (South Africa Standard Time)
 
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the
@@ -12,6 +12,21 @@ scalar DateTime
 interface Node {
   """The id of the object."""
   id: ID!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
 }
 
 interface PointInTimeInterface {
@@ -80,7 +95,7 @@ type Query {
 }
 
 type Subscription {
-  onNewUserMessage: UserNotificationUpdate!
+  onNewUserMessage: UserMessageUpdate!
 }
 
 type User {
@@ -100,8 +115,9 @@ type UserMessage implements Node {
   createdAt: DateTime!
 }
 
-type UserNotificationUpdate {
+type UserMessageUpdate {
   message: UserMessage!
+  messagesCount: ViewerMessageCount!
 }
 
 type UserProduct {
@@ -119,6 +135,33 @@ type UserProfile {
 
 type Viewer {
   user: User
-  products: [Product!]!
-  productsByCategory(linkedToUser: Boolean): [ProductCategory!]!
+  messages(after: String, first: Int, read: Boolean): ViewerMessagesConnection
+  products: [Product!]
+  productsByCategory(linkedToUser: Boolean): [ProductCategory!]
+}
+
+type ViewerMessageCount implements Node {
+  """The ID of an object"""
+  id: ID!
+  unread: Int!
+  deleted: Boolean!
+}
+
+"""A connection to a list of items."""
+type ViewerMessagesConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ViewerMessagesEdge]
+  total: Int!
+}
+
+"""An edge in a connection."""
+type ViewerMessagesEdge {
+  """The item at the end of the edge"""
+  node: UserMessage
+
+  """A cursor for use in pagination"""
+  cursor: String!
 }

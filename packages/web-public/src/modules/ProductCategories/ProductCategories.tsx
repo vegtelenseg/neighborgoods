@@ -89,7 +89,7 @@ export const ProductCategories = (props: Props) => {
             December
           </ListSubheader>
         </GridListTile> */}
-              {categories.productsByCategory.map((category) => (
+              {categories?.productsByCategory?.map((category) => (
                 <GridListTile
                   key={category.name}
                   onClick={() =>

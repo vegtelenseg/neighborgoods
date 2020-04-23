@@ -10,7 +10,7 @@ import {GraphQLDateTime} from 'graphql-iso-date';
 // import {NotificationCategory} from './UserNotificationCategoryConfig.graphql';
 import {UserMessage as UserMessageModel} from '../../models';
 import {nodeInterface} from '../Relay';
-//parent should always be a notification with it's readStatus
+//parent should always be a message with it's readStatus
 
 export const UserMessage = new GraphQLObjectType({
   name: 'UserMessage',

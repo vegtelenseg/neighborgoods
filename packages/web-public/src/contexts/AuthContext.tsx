@@ -24,10 +24,11 @@ export type AuthContextType =
     }
   | {
       authenticated: false;
+      refreshToken?: string;
     };
 
 export interface AuthContextStateType {
-  auth: AuthContextType;
+  authContext: AuthContextType;
   handleLogin: (
     username: string,
     password: string
@@ -36,7 +37,7 @@ export interface AuthContextStateType {
 }
 
 export const AuthContext = createContext<AuthContextStateType>({
-  auth: {authenticated: false},
+  authContext: {authenticated: false, refreshToken: ''},
   handleLogin: async () => {},
   handleLogout: () => {},
 });
@@ -52,12 +53,15 @@ export function AuthContextProvider({children}: Props) {
   const [logOutMessage, setLogoutMessage] = useState(
     'You have been logged out'
   );
-  const [localAuth, setLocalAuth] = useLocalStorage<AuthContextType>('auth', {
+  const [localStorageAuth, setLocalStorageAuth] = useLocalStorage<
+    AuthContextType
+  >('auth', {
     authenticated: false,
+    refreshToken: '',
   });
-  const [auth, setAuth] = useState<AuthContextType>(() => {
+  const [authContext, setAuthContext] = useState<AuthContextType>(() => {
     authTokenLoaded.current = true;
-    return localAuth;
+    return localStorageAuth;
   });
   const handleLogin = React.useCallback(
     async function(username: string, password: string) {
@@ -65,7 +69,6 @@ export function AuthContextProvider({children}: Props) {
 
       const body = new URLSearchParams();
       body.set('grant_type', 'client_credentials');
-
       // TODO: Only throws if the server cant be reached
       const result = await fetch(`${serverUri}/login`, {
         headers: {
@@ -80,21 +83,21 @@ export function AuthContextProvider({children}: Props) {
         const responseObject = await result.json();
         const token = responseObject.accessToken;
         const refreshToken = responseObject.refreshToken;
-        const newAuth: AuthContextType = {
+        const newAuthContext: AuthContextType = {
           authenticated: true,
           token,
           refreshToken,
           username,
         };
-        setLocalAuth(newAuth);
-        setAuth(newAuth);
+        setLocalStorageAuth(newAuthContext);
+        setAuthContext(newAuthContext);
         return result;
       } else {
         return result;
       }
       // TODO handle timeout
     },
-    [setLocalAuth]
+    [setLocalStorageAuth]
   );
 
   async function handleLogout(logOutMessage?: string) {
@@ -111,19 +114,22 @@ export function AuthContextProvider({children}: Props) {
   }
   const doLogout = useCallback(
     (message: string) => {
-      if (auth.authenticated === true) {
-        setAuth({authenticated: false});
+      if (authContext.authenticated === true) {
+        setAuthContext({
+          authenticated: false,
+          refreshToken: authContext.refreshToken,
+        });
         localStorage.removeItem('auth');
         // alert(message);
         setLogoutMessage('You have been logged out');
       }
     },
-    [auth.authenticated]
+    [authContext.authenticated]
   );
 
   useEffect(() => {
     if (loggingOut) {
-      //** Calls callback with dependencies on auth and
+      //** Calls callback with dependencies on authContext and
       //* history so that the useEffect don't fire on those dependencies
       //**
       doLogout(logOutMessage);
@@ -133,29 +139,29 @@ export function AuthContextProvider({children}: Props) {
 
   useEffect(() => {
     const authString = localStorage.getItem('auth') as string;
-    const localAuth = JSON.parse(authString);
-    let auth: AuthContextType = {authenticated: false};
+    const localStorageAuth = JSON.parse(authString);
+    let authContext: AuthContextType = {authenticated: false};
     if (
-      localAuth !== null
+      localStorageAuth !== null
       // TODO: Localize expiry
     ) {
-      auth = {
-        authenticated: localAuth.authenticated,
-        token: localAuth.token,
-        refreshToken: localAuth.refreshToken,
-        username: localAuth.username,
+      authContext = {
+        authenticated: localStorageAuth.authenticated,
+        token: localStorageAuth.token,
+        refreshToken: localStorageAuth.refreshToken,
+        username: localStorageAuth.username,
       };
-      setAuth(auth);
+      setAuthContext(authContext);
     }
   }, []);
 
-  // Prevent double render before auth token loaded
+  // Prevent double render before authContext token loaded
   if (!authTokenLoaded.current) {
     return null;
   }
 
   return (
-    <AuthContext.Provider value={{auth, handleLogin, handleLogout}}>
+    <AuthContext.Provider value={{authContext, handleLogin, handleLogout}}>
       {children}
     </AuthContext.Provider>
   );

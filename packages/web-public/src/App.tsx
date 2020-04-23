@@ -16,11 +16,12 @@ import AuthContextProvider, {
 import {Environment} from 'react-relay';
 import _ from 'lodash';
 import Menu from './modules/Menu/Menu';
+import Logout from './modules/Logout/Logout';
 import Products from './modules/Products/Products';
-
+import {MessagingSubscription} from './modules/NotificationSubscription/MessagingSubscription';
 const App = () => {
-  const {auth, handleLogout} = useAuthContextProvider();
-  const authRef = React.useRef(auth);
+  const {authContext, handleLogout} = useAuthContextProvider();
+  const authRef = React.useRef(authContext);
 
   const createEnvironment: () => Environment = React.useCallback(() => {
     return createRelayEnv(
@@ -28,10 +29,10 @@ const App = () => {
         handleLogout();
       },
       () => {
-        if (auth.authenticated) {
+        if (authContext.authenticated) {
           return {
-            accessToken: auth.token,
-            refreshToken: auth.refreshToken,
+            accessToken: authContext.token,
+            refreshToken: authContext.refreshToken,
           };
         } else {
           return {
@@ -41,17 +42,17 @@ const App = () => {
         }
       }
     );
-  }, [auth, handleLogout]);
+  }, [authContext, handleLogout]);
 
   const [environment, setEnvironment] = React.useState(createEnvironment());
 
   React.useEffect(() => {
-    if (!_.isEqual(authRef.current, auth) && environment) {
+    if (!_.isEqual(authRef.current, authContext) && environment) {
       setEnvironment(createEnvironment());
     }
 
-    authRef.current = auth;
-  }, [auth, createEnvironment, environment]);
+    authRef.current = authContext;
+  }, [authContext, createEnvironment, environment]);
   return (
     <RelayEnvironmentProvider environment={environment}>
       <Router>
@@ -75,8 +76,12 @@ const App = () => {
           <Route path="/products/:id">
             <Products />
           </Route>
+          <Route path="logout">
+            <Logout />
+          </Route>
         </Switch>
         <Navigation />
+        <MessagingSubscription />
       </Router>
     </RelayEnvironmentProvider>
   );

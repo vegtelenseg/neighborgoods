@@ -11,6 +11,9 @@ import {
   //CacheConfig,
   //ConcreteBatch,
   SubscribeFunction,
+  ConcreteBatch,
+  Variables,
+  cacheMiddleware,
   // ConcreteBatch,
 } from 'react-relay-network-modern/es'; // Changed to /lib to avoid mjs issue that fails the build
 import {
@@ -18,6 +21,8 @@ import {
   RecordSource,
   Store,
   INetwork,
+  CacheConfig,
+  Observable,
   //Observable,
   // Variables,
   // CacheConfig,
@@ -31,31 +36,28 @@ const IS_DEV_ENV = process.env.NODE_ENV === 'development';
 const serverUri = 'http://localhost:5000';
 
 type HandleLogoutFn = () => void;
-type GetAuthTokens = () => {accessToken:string; refreshToken: string};
+type GetAuthTokens = () => {accessToken: string; refreshToken: string};
 
 function createNetworkLayer(
   handleLogout: HandleLogoutFn,
   getAuthTokens: GetAuthTokens,
   subscribeFn: SubscribeFunction
 ): INetwork {
-
-  console.log("Creating env relay")
+  console.log('Creating env relay');
   const network = new RelayNetworkLayer(
     [
-      /*
       cacheMiddleware({
         size: 100, // max 100 requests
         ttl: 900000, // 15 minutes
       }),
-      */
       urlMiddleware({
         url: () => Promise.resolve(`${serverUri}/graphql`),
-        // headers: {
-        //   Authorization: `Bearer`,
-        // },
-        credentials: 'include'
+        headers: {
+          Authorization: `Bearer ${getAuthTokens().accessToken}`,
+        },
+        credentials: 'include',
       }),
-    
+
       // IS_DEV_ENV ? loggerMiddleware() : null,
       IS_DEV_ENV ? errorMiddleware() : null,
       // IS_DEV_ENV ? perfMiddleware() : null,
@@ -77,22 +79,26 @@ function createNetworkLayer(
       authMiddleware({
         allowEmptyToken: false,
         token: getAuthTokens().accessToken,
-        tokenRefreshPromise: async (req, err, ) => {
+        tokenRefreshPromise: async (req, err) => {
           // const authHeader = req.fetchOpts.headers['Authorization'];
-          const refreshToken = getAuthTokens().refreshToken;
-          console.log("REFRESH TOKEN: ", refreshToken);
-          const newToken = await fetch(`${serverUri}/refreshToken`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${refreshToken}`,
-              Accept: 'application/json', // eslint-disable-line
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({'refreshToken': refreshToken}) 
-          })
-          console.log("NEW TOKEN: ", newToken );
-          return newToken.json()
-        }
+          try {
+            const refreshToken = getAuthTokens().refreshToken;
+            console.log('REFRESH TOKEN: ', refreshToken);
+            const response = await fetch(`${serverUri}/refreshToken`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${refreshToken}`,
+                Accept: 'application/json', // eslint-disable-line
+                'Content-Type': 'application/json',
+              },
+            });
+            const {newAccessToken, newRefreshToken} = await response.json();
+            console.log('NEW TOKENS: ', newAccessToken, newRefreshToken);
+            return newAccessToken;
+          } catch (error) {
+            console.log('Error Refreshing Token FE: ', error.message);
+          }
+        },
       }),
       SHOW_PROGRESS
         ? progressMiddleware({
@@ -120,7 +126,7 @@ function createNetworkLayer(
         } catch (ex) {
           // Logout user out if we get a 401
           if (ex.res && ex.res.status === 401) {
-           // handleLogout();
+            // handleLogout();
           } else {
             // Report error
             bugsnagClient.notify(ex);
@@ -145,51 +151,51 @@ export default function createEnv(
 ) {
   const handlerProvider = undefined;
 
-  // const client = new SubscriptionClient(
-  //   // TODO: remove hack
-  //   `${serverUri}/graphql`.replace('http', 'ws'),
-  //   {
-  //     reconnect: true,
-  //     connectionParams: async () => {
-  //       const token = await getAuthTokenFn();
-  //       return {
-  //         Authorization: token,
-  //       };
-  //     },
-  //   }
-  // );
+  const client = new SubscriptionClient(
+    // TODO: remove hack
+    `${serverUri}/graphql`.replace('http', 'ws'),
+    {
+      reconnect: true,
+      connectionParams: async () => {
+        const token = await getAuthTokens().accessToken;
+        return {
+          Authorization: `Bearer ${token}`,
+        };
+      },
+    }
+  );
 
-  // const subscribeFn = (
-  //   config: ConcreteBatch,
-  //   variables: Variables,
-  //   _cacheConfig: CacheConfig
-  // ) => {
-  //   return Observable.create((sink) => {
-  //     const result = client
-  //       .request({
-  //         // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  //         // @ts-ignore
-  //         query: config.text,
-  //         operationName: config.name,
-  //         variables,
-  //       })
-  //       // New line for ts-ignore
-  //       .subscribe({
-  //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //         next(v: any) {
-  //           sink.next(v);
-  //         },
-  //         complete() {
-  //           sink.complete();
-  //         },
-  //         error(error: Error) {
-  //           sink.error(error);
-  //         },
-  //       });
+  const subscribeFn = (
+    config: ConcreteBatch,
+    variables: Variables,
+    _cacheConfig: CacheConfig
+  ) => {
+    return Observable.create((sink) => {
+      const result = client
+        .request({
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // @ts-ignore
+          query: config.text,
+          operationName: config.name,
+          variables,
+        })
+        // New line for ts-ignore
+        .subscribe({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          next(v: any) {
+            sink.next(v);
+          },
+          complete() {
+            sink.complete();
+          },
+          error(error: Error) {
+            sink.error(error);
+          },
+        });
 
-  //     return () => result.unsubscribe();
-  //   });
-  // };
+      return () => result.unsubscribe();
+    });
+  };
 
   const network = createNetworkLayer(
     handleLogout,

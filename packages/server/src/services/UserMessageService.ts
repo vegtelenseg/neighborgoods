@@ -135,13 +135,13 @@ class UserMessageService {
         throw new Error('User not authenticated');
       }
 
-      const userNotifications = await models.UserMessage.query(trx)
+      const userMessages = await models.UserMessage.query(trx)
         .context(context)
         .where({userId: context.user.id});
 
       const readNotifications: models.UserMessage[] = [];
-      for (let i = 0; i < userNotifications.length; i++) {
-        const userNotification = userNotifications[i];
+      for (let i = 0; i < userMessages.length; i++) {
+        const userNotification = userMessages[i];
 
         if (!userNotification.read) {
           await userNotification
@@ -165,13 +165,13 @@ class UserMessageService {
         throw new Error('User not authenticated');
       }
 
-      const userNotifications = await models.UserMessage.query(trx)
+      const userMessages = await models.UserMessage.query(trx)
         .context(context)
         .where({userId: context.user.id});
 
       const deletedNotifications: models.UserMessage[] = [];
-      for (let i = 0; i < userNotifications.length; i++) {
-        const userNotification = userNotifications[i];
+      for (let i = 0; i < userMessages.length; i++) {
+        const userNotification = userMessages[i];
 
         if (!userNotification.deleted) {
           await userNotification
@@ -180,7 +180,7 @@ class UserMessageService {
             .insert({deleted: true});
         } else {
           console.log(
-            `User notification with ID: ${userNotification.id} has already been deleted.`
+            `User message with ID: ${userNotification.id} has already been deleted.`
           );
         }
         deletedNotifications.push(userNotification);
@@ -195,13 +195,13 @@ class UserMessageService {
   ) {
     // const test
     return await transaction(models.UserMessage.knex(), async (trx) => {
-      const userNotifications = await models.UserMessage.query(trx)
+      const userMessages = await models.UserMessage.query(trx)
         .context(context)
         .whereIn('id', userNotificationIds);
 
       const readNotifications: models.UserMessage[] = [];
-      for (let i = 0; i < userNotifications.length; i++) {
-        const userNotification = userNotifications[i];
+      for (let i = 0; i < userMessages.length; i++) {
+        const userNotification = userMessages[i];
 
         //TODO: handle when read is specified false?
         if (!userNotification.read) {
@@ -211,7 +211,7 @@ class UserMessageService {
             .insert({read: true});
         } else {
           console.log(
-            `User notification with ID: ${userNotification.id} has already been read.`
+            `User message with ID: ${userNotification.id} has already been read.`
           );
         }
         readNotifications.push(userNotification);
@@ -225,13 +225,13 @@ class UserMessageService {
     userNotificationIds: number[]
   ) {
     return await transaction(models.UserMessage.knex(), async (trx) => {
-      const userNotifications = await models.UserMessage.query(trx)
+      const userMessages = await models.UserMessage.query(trx)
         .context(context)
         .whereIn('id', userNotificationIds);
 
       const deletedNotifications: models.UserMessage[] = [];
-      for (let i = 0; i < userNotifications.length; i++) {
-        const userNotification = userNotifications[i];
+      for (let i = 0; i < userMessages.length; i++) {
+        const userNotification = userMessages[i];
 
         //TODO: handle when read is specified false?
         if (!userNotification.deleted) {
@@ -241,7 +241,7 @@ class UserMessageService {
             .insert({deleted: true});
         } else {
           console.log(
-            `User notification with ID: ${userNotification.id} has already been deleted.`
+            `User message with ID: ${userNotification.id} has already been deleted.`
           );
         }
         deletedNotifications.push(userNotification);

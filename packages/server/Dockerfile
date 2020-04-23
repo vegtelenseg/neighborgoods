@@ -6,7 +6,7 @@ ENV TZ utc
 
 WORKDIR /usr/app
 COPY build /usr/app/
-# RUN echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
+RUN echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
 
 # Empty cache when done to reduce layer size
 RUN yarn install --production --frozen-lockfile && yarn cache clean
